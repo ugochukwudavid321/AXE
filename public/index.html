@@ -168,6 +168,14 @@
 <span class="material-symbols-outlined text-[20px]">close</span>
 </button>
 </div>
+<div class="mt-6">
+  <label class="font-label-md text-label-md font-semibold text-on-surface block mb-2">Compression Level</label>
+  <select id="compression-level" class="w-full p-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface">
+    <option value="low">Low — better quality, less reduction</option>
+    <option value="medium" selected>Medium — balanced</option>
+    <option value="high">High — smallest size, lower quality</option>
+  </select>
+</div>
 <!-- Action Button -->
 <div class="mt-8">
 <button class="w-full py-4 px-6 rounded-lg font-label-md text-label-md font-bold text-on-primary bg-outline-variant cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2" disabled="" id="compress-btn">
@@ -374,6 +382,7 @@
 
                 const formData = new FormData();
                 formData.append('file', currentFile);
+                formData.append('compressionLevel', document.getElementById('compression-level').value);
 
                 try {
                     const response = await fetch('/convert', {

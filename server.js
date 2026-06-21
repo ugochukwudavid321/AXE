@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 // Require necessary modules
 const express = require('express');
 const cors = require('cors');
@@ -79,6 +78,19 @@ app.post('/convert', upload.single('file'), async (req, res) => {
     const parsedPath = path.parse(req.file.originalname);
     const ext = parsedPath.ext.toLowerCase();
 
+    // Determine compression level (default to medium if not specified or invalid)
+    const validLevels = ['low', 'medium', 'high'];
+    const requestedLevel = req.body.compressionLevel;
+    const compressionLevel = validLevels.includes(requestedLevel) ? requestedLevel : 'medium';
+
+    // Map compression level to Sharp image quality (used for DOCX images)
+    const sharpQualityMap = { low: 80, medium: 60, high: 35 };
+    const sharpQuality = sharpQualityMap[compressionLevel];
+
+    // Map compression level to Ghostscript PDF settings preset (used for PDFs)
+    const gsSettingsMap = { low: '/printer', medium: '/ebook', high: '/screen' };
+    const gsSetting = gsSettingsMap[compressionLevel];
+
     // Process based on the detected file extension
     if (ext === '.docx') {
         const outputFilename = `${parsedPath.name}-compressed.docx`;
@@ -110,7 +122,11 @@ app.post('/convert', upload.single('file'), async (req, res) => {
                 // Apply the correct compression method based on the actual image format
                 if (fileExt === '.jpg' || fileExt === '.jpeg') {
                     compressedBuffer = await sharp(buffer)
-                        .jpeg({ quality: 60 })
+                        .jpeg({ quality: sharpQuality })
+                        .toBuffer();
+                } else if (fileExt === '.png') {
+                    compressedBuffer = await sharp(buffer)
+                        .png({ quality: sharpQuality })
                         .toBuffer();
                 } else if (fileExt === '.png') {
                     compressedBuffer = await sharp(buffer)
@@ -150,7 +166,7 @@ app.post('/convert', upload.single('file'), async (req, res) => {
         const gsArgs = [
             '-sDEVICE=pdfwrite',
             '-dCompatibilityLevel=1.4',
-            '-dPDFSETTINGS=/ebook',
+            `-dPDFSETTINGS=${gsSetting}`,
             '-dNOPAUSE',
             '-dQUIET',
             '-dBATCH',
