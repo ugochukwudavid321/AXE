@@ -1,4 +1,6 @@
+
 require('dotenv').config();
+
 // Require necessary modules
 const express = require('express');
 const cors = require('cors');
@@ -8,6 +10,7 @@ const fs = require('fs');
 const { execFile } = require('child_process');
 const JSZip = require('jszip');
 const sharp = require('sharp');
+const { v4: uuidv4 } = require('uuid');
 
 // Initialize the Express application
 const app = express();
@@ -31,72 +34,57 @@ const storage = multer.diskStorage({
         cb(null, tmpDir);
     },
     filename: function (req, file, cb) {
-        cb(null, file.originalname);
-    }
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+    cb(null, `${unique}-${file.originalname}`);
+}
 });
 const upload = multer({ storage: storage });
 
-// Helper function to handle sending the response, headers, and file cleanup
-const sendProcessedFile = (res, inputFilePath, outputFilePath, outputFilename, originalSize) => {
-    fs.stat(outputFilePath, (err, stats) => {
-        if (err) {
-            console.error('Error stating output file:', err);
-            fs.unlink(inputFilePath, () => {}); // Cleanup input file
-            return res.status(500).json({ error: 'Internal Server Error: Failed to read processed file.' });
+// In-memory job storage
+const jobs = new Map();
+
+// Background job cleanup: Runs every 5 minutes, deletes jobs/files older than 30 minutes
+setInterval(() => {
+    const now = Date.now();
+    const expiryTime = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+    for (const [jobId, job] of jobs.entries()) {
+        if (now - job.createdAt > expiryTime) {
+            // Clean up files if they still exist
+            if (job.inputPath) fs.unlink(job.inputPath, () => {});
+            if (job.outputPath) fs.unlink(job.outputPath, () => {});
+            jobs.delete(jobId);
         }
-
-        const compressedSize = stats.size;
-
-        // Expose custom headers to the client and set the sizes
-        res.set('Access-Control-Expose-Headers', 'X-Original-Size, X-Compressed-Size, content - disposition ' );
-        res.set('X-Original-Size', originalSize.toString());
-        res.set('X-Compressed-Size', compressedSize.toString());
-
-        // Send the file as a download
-        res.download(outputFilePath, outputFilename, (downloadError) => {
-            if (downloadError && !res.headersSent) {
-                console.error('File download error:', downloadError);
-                res.status(500).json({ error: 'Internal Server Error: Failed to send the processed file.' });
-            }
-
-            // Clean up: Delete both the original and compressed files from the tmp folder
-            fs.unlink(inputFilePath, () => {});
-            fs.unlink(outputFilePath, () => {});
-        });
-    });
-};
-
-// POST route to handle file processing based on auto-detected file type
-app.post('/convert', upload.single('file'), async (req, res) => {
-    // Error handling: Check if a file was actually uploaded
-    if (!req.file) {
-        return res.status(400).json({ error: 'Bad Request: No file uploaded.' });
     }
+}, 5 * 60 * 1000);
 
-    const inputFilePath = req.file.path;
-    const originalSize = req.file.size;
-    const parsedPath = path.parse(req.file.originalname);
+// Helper function to format bytes to MB
+const bytesToMB = (bytes) => (bytes / (1024 * 1024)).toFixed(2);
+
+// Background processing function
+const processFile = async (jobId, file, body) => {
+    const job = jobs.get(jobId);
+    if (!job) return;
+
+    const inputFilePath = file.path;
+    const parsedPath = path.parse(file.originalname);
     const ext = parsedPath.ext.toLowerCase();
 
     // Determine compression level (default to medium if not specified or invalid)
     const validLevels = ['low', 'medium', 'high'];
-    const requestedLevel = req.body.compressionLevel;
+    const requestedLevel = body.compressionLevel;
     const compressionLevel = validLevels.includes(requestedLevel) ? requestedLevel : 'medium';
 
-    // Map compression level to Sharp image quality (used for DOCX images)
-    const sharpQualityMap = { low: 80, medium: 60, high: 35 };
-    const sharpQuality = sharpQualityMap[compressionLevel];
+    try {
+        if (ext === '.docx') {
+            job.outputFilename = `${parsedPath.name}-compressed.docx`;
+            job.outputPath = path.join(__dirname, 'tmp', job.outputFilename);
 
-    // Map compression level to Ghostscript PDF settings preset (used for PDFs)
-    const gsSettingsMap = { low: '/printer', medium: '/ebook', high: '/screen' };
-    const gsSetting = gsSettingsMap[compressionLevel];
+            const sharpQualityMap = { low: 80, medium: 60, high: 35 };
+            const sharpQuality = sharpQualityMap[compressionLevel];
 
-    // Process based on the detected file extension
-    if (ext === '.docx') {
-        const outputFilename = `${parsedPath.name}-compressed.docx`;
-        const outputFilePath = path.join(__dirname, 'tmp', outputFilename);
-
-        try {
+            job.logs.push("Reading DOCX structure...");
+            
             // Open the DOCX as a zip archive
             const fileData = await fs.promises.readFile(inputFilePath);
             const zip = await JSZip.loadAsync(fileData);
@@ -112,8 +100,12 @@ app.post('/convert', upload.single('file'), async (req, res) => {
                 }
             });
 
+            job.logs.push(`Found ${mediaFiles.length} image(s) inside document`);
+
             // Compress each image using the Sharp library
+            let imageIndex = 1;
             for (const { relativePath, file } of mediaFiles) {
+                job.logs.push(`Compressing image ${imageIndex} of ${mediaFiles.length}...`);
                 const buffer = await file.async("nodebuffer");
                 const fileExt = path.extname(relativePath).toLowerCase();
 
@@ -128,10 +120,6 @@ app.post('/convert', upload.single('file'), async (req, res) => {
                     compressedBuffer = await sharp(buffer)
                         .png({ quality: sharpQuality })
                         .toBuffer();
-                } else if (fileExt === '.png') {
-                    compressedBuffer = await sharp(buffer)
-                        .png({ quality: 60 })
-                        .toBuffer();
                 } else {
                     // Fallback: skip compression for unrecognized formats, keep original
                     compressedBuffer = buffer;
@@ -139,58 +127,165 @@ app.post('/convert', upload.single('file'), async (req, res) => {
 
                 // Replace the original file in the zip with the compressed one
                 zip.file(`word/media/${relativePath}`, compressedBuffer);
+                imageIndex++;
             }
 
+            job.logs.push("Rebuilding document archive...");
+            
             // Rebuild the zip and save to the output path
             const content = await zip.generateAsync({
                 type: "nodebuffer",
                 compression: "DEFLATE",
                 compressionOptions: { level: 9 }
             });
-            await fs.promises.writeFile(outputFilePath, content);
+            await fs.promises.writeFile(job.outputPath, content);
 
-            // Send the result back to the client
-            sendProcessedFile(res, inputFilePath, outputFilePath, outputFilename, originalSize);
+        } else if (ext === '.pdf') {
+            job.outputFilename = `${parsedPath.name}-compressed.pdf`;
+            job.outputPath = path.join(__dirname, 'tmp', job.outputFilename);
 
-        } catch (error) {
-            console.error('JSZip/Sharp processing error:', error);
-            fs.unlink(inputFilePath, () => {}); // Clean up
-            return res.status(500).json({ error: 'Internal Server Error: Failed to compress DOCX file.' });
+            const gsSettingsMap = { low: '/printer', medium: '/ebook', high: '/screen' };
+            const gsSetting = gsSettingsMap[compressionLevel];
+
+            job.logs.push("Initialising Ghostscript engine...");
+            job.logs.push(`Applying ${compressionLevel.toUpperCase()} compression profile...`);
+
+            // Ghostscript arguments for selected compression level
+            const gsArgs = [
+                '-sDEVICE=pdfwrite',
+                '-dCompatibilityLevel=1.4',
+                `-dPDFSETTINGS=${gsSetting}`,
+                '-dNOPAUSE',
+                '-dQUIET',
+                '-dBATCH',
+                `-sOutputFile=${job.outputPath}`,
+                inputFilePath
+            ];
+
+            // Run Ghostscript as a Promise
+            await new Promise((resolve, reject) => {
+                execFile('gs', gsArgs, (error, stdout, stderr) => {
+                    if (error) reject(error);
+                    else resolve();
+                });
+            });
+
+            job.logs.push("Compression complete.");
         }
 
-    } else if (ext === '.pdf') {
-        const outputFilename = `${parsedPath.name}-compressed.pdf`;
-        const outputFilePath = path.join(__dirname, 'tmp', outputFilename);
+        // Finalize success status
+        const stats = await fs.promises.stat(job.outputPath);
+        job.compressedSize = stats.size;
+        
+        const reductionPercentage = (((job.originalSize - job.compressedSize) / job.originalSize) * 100).toFixed(2);
+        
+        job.logs.push(`Compressed size: ${bytesToMB(job.compressedSize)} MB`);
+        job.logs.push(`Size reduced by ${reductionPercentage}%`);
+        job.logs.push("File ready for download.");
+        
+        job.status = 'done';
 
-        // Ghostscript arguments for ebook-level standard compression
-        const gsArgs = [
-            '-sDEVICE=pdfwrite',
-            '-dCompatibilityLevel=1.4',
-            `-dPDFSETTINGS=${gsSetting}`,
-            '-dNOPAUSE',
-            '-dQUIET',
-            '-dBATCH',
-            `-sOutputFile=${outputFilePath}`,
-            inputFilePath
-        ];
+    } catch (error) {
+        console.error(`Job ${jobId} failed:`, error);
+        job.status = 'error';
+        job.error = error.message || 'An unknown error occurred during compression.';
+    } finally {
+        // Clean up input file immediately after processing (success or failure)
+        fs.unlink(inputFilePath, () => {});
+    }
+};
 
-        // Run Ghostscript as a child process
-        execFile('gs', gsArgs, (error, stdout, stderr) => {
-            if (error) {
-                console.error('Ghostscript execution error:', error);
-                fs.unlink(inputFilePath, () => {}); // Clean up
-                return res.status(500).json({ error: 'Internal Server Error: Ghostscript failed to compress the PDF.' });
-            }
+// POST route to initialize the compression job
+app.post('/compress', upload.single('file'), (req, res) => {
+    // Error handling: Check if a file was actually uploaded
+    if (!req.file) {
+        return res.status(400).json({ error: 'Bad Request: No file uploaded.' });
+    }
 
-            // Send the result back to the client
-            sendProcessedFile(res, inputFilePath, outputFilePath, outputFilename, originalSize);
-        });
+    const parsedPath = path.parse(req.file.originalname);
+    const ext = parsedPath.ext.toLowerCase();
 
-    } else {
-        // Error handling: Handle unsupported file types
-        fs.unlink(inputFilePath, () => {}); // Clean up
+    // Reject unsupported file types immediately
+    if (ext !== '.docx' && ext !== '.pdf') {
+        fs.unlink(req.file.path, () => {});
         return res.status(400).json({ error: 'Unsupported file type. Please upload a PDF or DOCX file.' });
     }
+
+    const jobId = uuidv4();
+    
+    // Create the job record in memory
+    const job = {
+        status: 'processing',
+        logs: [],
+        inputPath: req.file.path,
+        outputPath: null,
+        outputFilename: null,
+        originalSize: req.file.size,
+        compressedSize: null,
+        error: null,
+        createdAt: Date.now()
+    };
+
+    jobs.set(jobId, job);
+
+    // Initial logs
+    job.logs.push(`Received: ${req.file.originalname}`);
+    job.logs.push(`Original size: ${bytesToMB(job.originalSize)} MB`);
+    job.logs.push("Starting compression pipeline...");
+
+    // Start background processing without blocking the response
+    processFile(jobId, req.file, req.body);
+
+    // Immediately return the Job ID to the client for polling
+    res.json({ jobId });
+});
+
+// GET route to poll job status
+app.get('/status/:jobId', (req, res) => {
+    const job = jobs.get(req.params.jobId);
+    
+    if (!job) {
+        return res.status(404).json({ error: 'Job not found or expired.' });
+    }
+
+    res.json({
+        status: job.status,
+        logs: job.logs,
+        originalSize: job.originalSize,
+        compressedSize: job.compressedSize,
+        error: job.error
+    });
+});
+
+// GET route to download the finished file
+app.get('/download/:jobId', (req, res) => {
+    const jobId = req.params.jobId;
+    const job = jobs.get(jobId);
+
+    if (!job) {
+        return res.status(404).json({ error: 'Job not found or expired.' });
+    }
+
+    if (job.status !== 'done' || !job.outputPath) {
+        return res.status(400).json({ error: 'File is not ready for download.' });
+    }
+
+    // Expose custom headers to the client and set the sizes
+    res.set('Access-Control-Expose-Headers', 'X-Original-Size, X-Compressed-Size, Content-Disposition');
+    res.set('X-Original-Size', job.originalSize.toString());
+    res.set('X-Compressed-Size', job.compressedSize.toString());
+
+    // Send the file as a download
+    res.download(job.outputPath, job.outputFilename, (downloadError) => {
+        if (downloadError && !res.headersSent) {
+            console.error(`File download error for job ${jobId}:`, downloadError);
+            res.status(500).json({ error: 'Internal Server Error: Failed to send the processed file.' });
+        }
+
+        // Clean up output file and remove the job from memory after download
+        fs.unlink(job.outputPath, () => {});
+        jobs.delete(jobId);
+    });
 });
 
 // Start the server

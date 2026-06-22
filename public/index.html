@@ -372,77 +372,86 @@
 
             // -- Real API Call & Compression Logic --
 
-            let downloadBlobUrl = null;
-            let downloadFilename = null;
+            let downloadJobId = null;
+            let pollInterval = null;
 
             compressBtn.addEventListener('click', async () => {
                 if (!currentFile) return;
 
                 showView(processingState);
+                if (window.startChopping) window.startChopping();
 
                 const formData = new FormData();
                 formData.append('file', currentFile);
                 formData.append('compressionLevel', document.getElementById('compression-level').value);
 
                 try {
-                    const response = await fetch('/convert', {
+                    const response = await fetch('/compress', {
                         method: 'POST',
                         body: formData
                     });
 
                     if (!response.ok) {
-                        // Try to read the server's JSON error message
-                        let errorMessage = 'An error occurred while processing your file.';
-                        try {
-                            const errorData = await response.json();
-                            if (errorData.error) errorMessage = errorData.error;
-                        } catch (parseErr) {
-                            // Response wasn't JSON, keep default message
-                        }
-                        document.getElementById('server-error-msg').textContent = errorMessage;
-                        showView(errorState);
+                        const errorData = await response.json().catch(() => ({}));
+                        showError(errorData.error || 'Failed to start compression.');
                         return;
                     }
 
-                    // Read size headers
-                    const originalSize = parseInt(response.headers.get('X-Original-Size'), 10);
-                    const compressedSize = parseInt(response.headers.get('X-Compressed-Size'), 10);
+                    const { jobId } = await response.json();
+                    downloadJobId = jobId;
 
-                    // Get the filename from Content-Disposition header, fallback to a default
-                    const disposition = response.headers.get('Content-Disposition');
-                    let filename = 'compressed-file';
-                    if (disposition && disposition.includes('filename=')) {
-                        filename = disposition.split('filename=')[1].replace(/"/g, '').trim();
-                    }
+                    let seenLogCount = 0;
 
-                    // Convert the response into a downloadable blob
-                    const blob = await response.blob();
-                    downloadBlobUrl = URL.createObjectURL(blob);
-                    downloadFilename = filename;
+                    pollInterval = setInterval(async () => {
+                        try {
+                            const statusRes = await fetch(`/status/${jobId}`);
+                            const statusData = await statusRes.json();
 
-                    // Update Stats UI
-                    let statsHtml;
-                    if (!isNaN(originalSize) && !isNaN(compressedSize) && originalSize > 0) {
-                        const reductionPercent = Math.round((1 - (compressedSize / originalSize)) * 100);
-                        statsHtml = `
-                            <span class="font-semibold text-on-surface line-through">${formatBytes(originalSize)}</span>
-                            <span class="mx-2 material-symbols-outlined text-[16px] align-middle">arrow_forward</span>
-                            <span class="font-bold text-primary">${formatBytes(compressedSize)}</span>
-                            <span class="ml-2 text-sm px-2 py-0.5 bg-tertiary-container/10 text-tertiary rounded-full">-${reductionPercent}%</span>
-                        `;
-                    } else {
-                        statsHtml = `<span class="font-semibold text-on-surface">File compressed successfully</span>`;
-                    }
-                    document.getElementById('stats-text').innerHTML = statsHtml;
+                            // Push any new log lines
+                            if (statusData.logs && statusData.logs.length > seenLogCount) {
+                                for (let i = seenLogCount; i < statusData.logs.length; i++) {
+                                    if (window.pushLog) window.pushLog(statusData.logs[i]);
+                                }
+                                seenLogCount = statusData.logs.length;
+                            }
 
-                    showView(successState);
+                            if (statusData.status === 'done') {
+                                clearInterval(pollInterval);
+                                if (window.finishChopping) window.finishChopping();
+
+                                const originalSize = statusData.originalSize;
+                                const compressedSize = statusData.compressedSize;
+                                const reductionPercent = Math.round((1 - (compressedSize / originalSize)) * 100);
+
+                                document.getElementById('stats-text').innerHTML = `
+                                    <span class="font-semibold text-on-surface line-through">${formatBytes(originalSize)}</span>
+                                    <span class="mx-2 material-symbols-outlined text-[16px] align-middle">arrow_forward</span>
+                                    <span class="font-bold text-primary">${formatBytes(compressedSize)}</span>
+                                    <span class="ml-2 text-sm px-2 py-0.5 bg-tertiary-container/10 text-tertiary rounded-full">-${reductionPercent}%</span>
+                                `;
+
+                                setTimeout(() => showView(successState), 600); // brief pause to show "Chopped."
+
+                            } else if (statusData.status === 'error') {
+                                clearInterval(pollInterval);
+                                showError(statusData.error || 'Compression failed.');
+                            }
+                        } catch (pollErr) {
+                            clearInterval(pollInterval);
+                            showError('Lost connection while checking progress.');
+                        }
+                    }, 2000);
 
                 } catch (networkErr) {
-                    console.error('Network or fetch error:', networkErr);
-                    document.getElementById('server-error-msg').textContent = 'Could not reach the server. Please check your connection and try again.';
-                    showView(errorState);
+                    console.error('Network error:', networkErr);
+                    showError('Could not reach the server. Please check your connection and try again.');
                 }
             });
+
+            function showError(message) {
+                document.getElementById('server-error-msg').textContent = message;
+                showView(errorState);
+            }
 
             resetBtn.addEventListener('click', () => {
                 resetFileState();
@@ -454,13 +463,8 @@
             });
 
             downloadBtn.addEventListener('click', () => {
-                if (!downloadBlobUrl) return;
-                const a = document.createElement('a');
-                a.href = downloadBlobUrl;
-                a.download = downloadFilename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                if (!downloadJobId) return;
+                window.location.href = `/download/${downloadJobId}`;
             });
         });
     </script>
