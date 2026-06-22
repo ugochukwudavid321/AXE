@@ -186,16 +186,146 @@
 </div>
 <!-- State 2: Processing (Hidden initially) -->
 <div class="hidden py-8 flex flex-col items-center justify-center text-center" id="processing-state">
-<div class="relative w-20 h-20 mb-6">
-<svg class="spinner w-full h-full text-surface-variant" viewbox="0 0 50 50">
-<circle class="path" cx="25" cy="25" fill="none" r="20" stroke="currentColor" stroke-width="4"></circle>
-</svg>
-<svg class="spinner w-full h-full text-primary absolute top-0 left-0" style="animation-direction: reverse; animation-duration: 1.5s;" viewbox="0 0 50 50">
-<circle class="path" cx="25" cy="25" fill="none" r="20" stroke="currentColor" stroke-dasharray="30 100" stroke-linecap="round" stroke-width="4"></circle>
-</svg>
+
+<style>
+    #axe-loading-wrapper {
+        background: #0a0a0a;
+        padding: 24px;
+        width: 300px;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+    #axe-typewriter-container {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 18px;
+        color: #e5a96b;
+        margin-bottom: 16px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        transition: opacity 0.3s ease;
+    }
+    #axe-typewriter-text.finished { color: #4caf50; }
+    #axe-cursor {
+        display: inline-block;
+        margin-left: 2px;
+        animation: axe-blink 1s step-start infinite;
+    }
+    #axe-typewriter-container.hide-cursor #axe-cursor { display: none; }
+    @keyframes axe-blink { 50% { opacity: 0; } }
+    #axe-terminal {
+        background: #0d0d0d;
+        border: 1px solid #2a2a2a;
+        border-radius: 6px;
+        max-height: 160px;
+        height: 160px;
+        overflow-y: auto;
+        padding: 10px;
+        box-sizing: border-box;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 12px;
+    }
+    #axe-terminal::-webkit-scrollbar { width: 6px; }
+    #axe-terminal::-webkit-scrollbar-track { background: #0d0d0d; border-radius: 6px; }
+    #axe-terminal::-webkit-scrollbar-thumb { background: #333; border-radius: 6px; }
+    .axe-log-line {
+        color: #666;
+        margin-bottom: 6px;
+        line-height: 1.4;
+        word-wrap: break-word;
+    }
+    .axe-log-line:last-child { color: #aaa; margin-bottom: 0; }
+</style>
+
+<div id="axe-loading-wrapper">
+    <div id="axe-typewriter-container">
+        <span id="axe-typewriter-text"></span><span id="axe-cursor">|</span>
+    </div>
+    <div id="axe-terminal"></div>
 </div>
-<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Compressing your document...</h3>
-<p class="font-body-md text-body-md text-on-surface-variant">Applying high-fidelity reduction algorithms.</p>
+
+<script>
+    (function() {
+        let typeTimeout;
+        let phaseTimeout;
+        let isFinished = false;
+
+        const textEl = document.getElementById('axe-typewriter-text');
+        const containerEl = document.getElementById('axe-typewriter-container');
+        const terminalEl = document.getElementById('axe-terminal');
+
+        function clearTimeouts() {
+            clearTimeout(typeTimeout);
+            clearTimeout(phaseTimeout);
+        }
+
+        function typeString(str, speed, callback) {
+            let i = 0;
+            textEl.textContent = '';
+            containerEl.classList.remove('hide-cursor');
+
+            function typeNext() {
+                if (isFinished && str !== 'Chopped.') return;
+                if (i < str.length) {
+                    textEl.textContent += str.charAt(i);
+                    i++;
+                    typeTimeout = setTimeout(typeNext, speed);
+                } else {
+                    if (callback) callback();
+                }
+            }
+            typeNext();
+        }
+
+        function startTypewriterLoop() {
+            if (isFinished) return;
+            containerEl.style.opacity = '1';
+            typeString('Hacking your file...', 80, () => {
+                if (isFinished) return;
+                containerEl.classList.add('hide-cursor');
+                phaseTimeout = setTimeout(() => {
+                    if (isFinished) return;
+                    containerEl.style.opacity = '0';
+                    phaseTimeout = setTimeout(() => {
+                        if (isFinished) return;
+                        startTypewriterLoop();
+                    }, 300);
+                }, 800);
+            });
+        }
+
+        window.startChopping = function() {
+            isFinished = false;
+            clearTimeouts();
+            terminalEl.innerHTML = '';
+            textEl.classList.remove('finished');
+            containerEl.style.opacity = '1';
+            startTypewriterLoop();
+        };
+
+        window.finishChopping = function() {
+            isFinished = true;
+            clearTimeouts();
+            containerEl.style.transition = 'none';
+            containerEl.style.opacity = '1';
+            containerEl.classList.remove('hide-cursor');
+            textEl.classList.add('finished');
+            setTimeout(() => {
+                containerEl.style.transition = 'opacity 0.3s ease';
+                typeString('Chopped.', 80);
+            }, 10);
+        };
+
+        window.pushLog = function(message) {
+            const line = document.createElement('div');
+            line.className = 'axe-log-line';
+            line.textContent = '→ ' + message;
+            terminalEl.appendChild(line);
+            terminalEl.scrollTop = terminalEl.scrollHeight;
+        };
+    })();
+</script>
+
 </div>
 <!-- State 3: Success (Hidden initially) -->
 <div class="hidden text-center" id="success-state">
@@ -401,8 +531,14 @@
                     downloadJobId = jobId;
 
                     let seenLogCount = 0;
+                    // Resume polling if user returns to the tab
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && downloadJobId && !pollInterval) {
+        pollInterval = setInterval(pollStatus, 2000);
+    }
+});
 
-                    pollInterval = setInterval(async () => {
+                  const pollStatus = async () => {
                         try {
                             const statusRes = await fetch(`/status/${jobId}`);
                             const statusData = await statusRes.json();
@@ -417,6 +553,7 @@
 
                             if (statusData.status === 'done') {
                                 clearInterval(pollInterval);
+                                pollInterval = null;
                                 if (window.finishChopping) window.finishChopping();
 
                                 const originalSize = statusData.originalSize;
@@ -430,17 +567,28 @@
                                     <span class="ml-2 text-sm px-2 py-0.5 bg-tertiary-container/10 text-tertiary rounded-full">-${reductionPercent}%</span>
                                 `;
 
-                                setTimeout(() => showView(successState), 600); // brief pause to show "Chopped."
+                                setTimeout(() => showView(successState), 600);
 
                             } else if (statusData.status === 'error') {
                                 clearInterval(pollInterval);
+                                pollInterval = null;
                                 showError(statusData.error || 'Compression failed.');
                             }
                         } catch (pollErr) {
                             clearInterval(pollInterval);
+                            pollInterval = null;
                             showError('Lost connection while checking progress.');
                         }
-                    }, 2000);
+                    };
+
+                    pollInterval = setInterval(pollStatus, 2000);
+
+                    // Resume polling if user returns to the tab mid-compression
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible' && downloadJobId && !pollInterval) {
+                            pollInterval = setInterval(pollStatus, 2000);
+                        }
+                    });
 
                 } catch (networkErr) {
                     console.error('Network error:', networkErr);
@@ -467,5 +615,5 @@
                 window.location.href = `/download/${downloadJobId}`;
             });
         });
-    </script>
+    </script>  
 </body></html>
