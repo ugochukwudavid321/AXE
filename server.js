@@ -10,7 +10,7 @@ const fs = require('fs');
 const { execFile } = require('child_process');
 const JSZip = require('jszip');
 const sharp = require('sharp');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 
 // Initialize the Express application
 const app = express();
@@ -211,7 +211,7 @@ app.post('/compress', upload.single('file'), (req, res) => {
         return res.status(400).json({ error: 'Unsupported file type. Please upload a PDF or DOCX file.' });
     }
 
-    const jobId = uuidv4();
+    const jobId = crypto.randomUUID();
     
     // Create the job record in memory
     const job = {
