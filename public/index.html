@@ -39,6 +39,7 @@
     }
   </script>
   <style>
+  html, body { overflow-x: hidden; }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #0a0a0c; }
     ::-webkit-scrollbar-thumb { background: #26262b; border-radius: 3px; }
@@ -91,10 +92,10 @@
       <!-- Controls Right Side -->
       <div class="flex items-center gap-6">
         <div class="hidden sm:flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="text-xs text-neutral-400 uppercase tracking-wider">ENGINE SECURE</span>
-          <span id="auth-greeting" class="text-xs text-amber-500 uppercase tracking-wider ml-4 hidden font-bold"></span>
-        </div>
+  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+  <span class="text-xs text-neutral-400 uppercase tracking-wider">ENGINE SECURE</span>
+</div>
+<span id="auth-greeting" class="text-xs text-amber-500 uppercase tracking-wider hidden font-bold"></span>
         
         <!-- Hamburger Menu Container -->
         <div class="relative">
@@ -132,7 +133,7 @@
   </header>
 
   <!-- Notification Banner -->
-  <div id="notification-banner" class="fixed top-6 right-6 z-50 transform translate-x-80 opacity-0 transition-all duration-300 max-w-sm w-full pointer-events-none">
+  <div id="notification-banner" class="fixed top-6 right-6 z-50 transform translate-x-[120%] opacity-0 transition-all duration-300 max-w-sm w-full pointer-events-none">
     <div class="bg-dark-800 border-l-4 border-amber-500 text-white p-4 shadow-2xl rounded-r-lg flex items-start gap-3 pointer-events-auto">
       <div class="text-amber-500 mt-0.5">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -289,6 +290,7 @@
                 <p class="text-xs text-neutral-300 mt-1">Access this file for 30 days securely + get future Impulse tool updates.</p>
               </div>
             </div>
+     <input type="text" id="post-prompt-name" placeholder="Preferred name (first time only)" class="w-full bg-dark-900 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 focus:shadow-neon-amber transition-all mb-2">
             <div class="flex gap-2">
               <input type="email" id="post-prompt-email" placeholder="Enter your email" class="flex-1 bg-dark-900 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 focus:shadow-neon-amber transition-all">
               <button id="post-prompt-submit" class="bg-amber-500 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-amber-400 transition-colors">Send Link</button>
@@ -356,10 +358,13 @@
   <!-- Technical Brand Footer -->
   <footer class="relative z-10 border-t border-neutral-800/40 bg-neutral-950/60 py-6 px-6 text-center">
     <div class="max-w-6xl mx-auto">
-      <p class="text-xs text-neutral-500 tracking-wider">
-        Brought to you by 
-        <a href="#REPLACE_WITH_IMPULSE_LINK" class="font-display font-extrabold text-amber-500 hover:text-white transition-colors duration-300">IMPULSE</a>
-      </p>
+  <p class="text-xs text-neutral-500 tracking-wider">
+    Brought to you by 
+    <a href="#REPLACE_WITH_IMPULSE_LINK" class="font-display font-extrabold text-amber-500 hover:text-white transition-colors duration-300">IMPULSE</a>
+  </p>
+  <p class="text-[10px] text-neutral-600 mt-2">
+    Questions? <a href="mailto:impulsenocode@gmail.com" class="text-amber-500/80 hover:text-amber-500">impulsenocode@gmail.com</a>
+  </p>
     </div>
   </footer>
 
@@ -372,8 +377,12 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
       </div>
-      <div class="p-6 space-y-4">
+         <div class="p-6 space-y-4">
         <p class="text-xs text-neutral-400">Authenticate via Magic Link to save compressed documents for 30 days and manage preferences.</p>
+        <div>
+          <label class="block text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">Preferred Name <span class="text-neutral-600 normal-case font-normal">(first time only — leave blank if returning)</span></label>
+          <input type="text" id="auth-name-input" placeholder="What should we call you?" class="w-full bg-dark-950 border border-neutral-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:shadow-neon-amber transition-all mb-3">
+        </div>
         <div>
           <label class="block text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">Secure Email</label>
           <input type="email" id="auth-email-input" placeholder="operative@impulse.com" class="w-full bg-dark-950 border border-neutral-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:shadow-neon-amber transition-all">
@@ -408,6 +417,7 @@
 
   <!-- Application Logic -->
   <script>
+  window.onerror = function(msg, url, line) { alert('Error at line ' + line + ': ' + msg); };
     // ----------------------------------------------------
     // 1. SUPABASE INITIALIZATION
     // ----------------------------------------------------
@@ -440,7 +450,8 @@
       if (session && session.user) {
         menuLoggedOut.classList.add('hidden');
         menuLoggedIn.classList.remove('hidden');
-        authGreeting.innerText = `Welcome, ${session.user.email.split('@')[0]}`;
+        const displayName = session.user.user_metadata?.preferred_name || session.user.email.split('@')[0];
+        authGreeting.innerText = `Welcome, ${displayName}`;
         authGreeting.classList.remove('hidden');
       } else {
         menuLoggedOut.classList.remove('hidden');
@@ -476,14 +487,19 @@
     document.getElementById('auth-modal-close').addEventListener('click', closeAuthModal);
     
     // Magic Link Trigger
-    document.getElementById('auth-submit-btn').addEventListener('click', async () => {
+   document.getElementById('auth-submit-btn').addEventListener('click', async () => {
       const email = document.getElementById('auth-email-input').value;
+      const preferredName = document.getElementById('auth-name-input').value.trim();
       if (!email) return showToast('Error', 'Please enter a valid email.', 'rose');
       
       const btn = document.getElementById('auth-submit-btn');
       btn.innerText = "Transmitting..."; btn.disabled = true;
 
-      const { error } = await supabaseClient.auth.signInWithOtp({ email });
+      const otpPayload = { email };
+      if (preferredName) {
+        otpPayload.options = { data: { preferred_name: preferredName } };
+      }
+      const { error } = await supabaseClient.auth.signInWithOtp(otpPayload);
       if (error) {
         showToast('Auth Error', error.message, 'rose');
         btn.innerText = "Send Magic Link"; btn.disabled = false;
@@ -660,11 +676,11 @@
       document.getElementById('notification-title').innerText = title.toUpperCase();
       document.getElementById('notification-message').innerText = message;
       banner.style.opacity = '1'; banner.style.transform = 'translateX(0)';
-      setTimeout(() => { banner.style.opacity = '0'; banner.style.transform = 'translateX(20rem)'; }, 5000);
+      setTimeout(() => { banner.style.opacity = '0'; banner.style.transform = 'translateX(120%)'; }, 5000);
     }
     function dismissNotification() {
       const banner = document.getElementById('notification-banner');
-      banner.style.opacity = '0'; banner.style.transform = 'translateX(20rem)';
+      banner.style.opacity = '0'; banner.style.transform = 'translateX(120%)';
     }
 
     dropZone.addEventListener('click', (e) => { if (!e.target.closest('#remove-file-btn')) fileInput.click(); });
@@ -831,13 +847,17 @@
     document.getElementById('post-prompt-skip').addEventListener('click', () => {
       postCompressionSavePrompt.classList.add('hidden');
     });
-    
     postPromptSubmitBtn.addEventListener('click', async () => {
       const email = document.getElementById('post-prompt-email').value;
+      const preferredName = document.getElementById('post-prompt-name').value.trim();
       if (!email) return showToast('Error', 'Please enter a valid email.', 'rose');
       
       postPromptSubmitBtn.innerText = 'Sending...'; postPromptSubmitBtn.disabled = true;
-      const { error } = await supabaseClient.auth.signInWithOtp({ email });
+      const otpPayload = { email };
+      if (preferredName) {
+        otpPayload.options = { data: { preferred_name: preferredName } };
+      }
+      const { error } = await supabaseClient.auth.signInWithOtp(otpPayload);
       if (error) {
         showToast('Auth Error', error.message, 'rose');
         postPromptSubmitBtn.innerText = 'Send Link'; postPromptSubmitBtn.disabled = false;
