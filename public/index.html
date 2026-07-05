@@ -13,6 +13,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
     tailwind.config = {
@@ -23,23 +26,8 @@
             display: ['Syne', 'sans-serif'],
           },
           colors: {
-            amber: {
-              50: '#fefbeb',
-              100: '#fef3c7',
-              200: '#fde68a',
-              300: '#fcd34d',
-              400: '#fbbf24',
-              500: '#f59e0b',
-              600: '#d97706',
-              700: '#b45309',
-              800: '#92400e',
-              900: '#78350f',
-            },
-            dark: {
-              800: '#121215',
-              900: '#0a0a0c',
-              950: '#030304',
-            }
+            amber: { 50: '#fefbeb', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 700: '#b45309', 800: '#92400e', 900: '#78350f', },
+            dark: { 800: '#121215', 900: '#0a0a0c', 950: '#030304', }
           },
           boxShadow: {
             'neon-amber': '0 0 20px rgba(245, 158, 11, 0.15)',
@@ -50,33 +38,27 @@
       }
     }
   </script>
-
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #0a0a0c; }
     ::-webkit-scrollbar-thumb { background: #26262b; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
-
     .grid-bg {
       background-size: 40px 40px;
       background-image: 
         linear-gradient(to right, rgba(245, 158, 11, 0.03) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(245, 158, 11, 0.03) 1px, transparent 1px);
     }
-
     .scanlines {
       background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.3));
       background-size: 100% 4px;
     }
-
     @keyframes laser-sweep {
       0% { transform: translateY(-100%); }
       50% { transform: translateY(300%); }
       100% { transform: translateY(-100%); }
     }
     .laser-line { animation: laser-sweep 4s infinite linear; }
-    
-    /* Glitch transition utility for disclaimers */
     .beep-flash { animation: beep 0.15s ease-out; }
     @keyframes beep {
       0% { opacity: 1; filter: brightness(1); }
@@ -86,17 +68,15 @@
   </style>
 </head>
 <body class="h-full font-sans antialiased bg-dark-950 flex flex-col justify-between overflow-x-hidden relative">
-
   <!-- Aesthetic Background Layer -->
   <div class="absolute inset-0 grid-bg pointer-events-none z-0"></div>
   <div class="absolute top-[-20%] left-[50%] -translate-x-1/2 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
-
+  
   <!-- Header Section -->
   <header class="relative z-20 border-b border-neutral-800/60 bg-dark-900/80 backdrop-blur-md px-6 py-4">
     <div class="max-w-6xl mx-auto flex items-center justify-between">
       
-      <!-- Logo as a Hyperlink -->
-      <!-- TO-DO: Replace #REPLACE_WITH_AXE_LINK with actual AXE homepage/link -->
+      <!-- Logo -->
       <a href="#REPLACE_WITH_AXE_LINK" class="flex items-center gap-3 group hover:opacity-80 transition-opacity">
         <div class="w-10 h-10 bg-amber-500 text-black flex items-center justify-center font-display font-extrabold text-2xl tracking-tighter transform -skew-x-12 shadow-neon-amber group-hover:scale-105 transition-transform">
           A
@@ -108,13 +88,14 @@
         </div>
       </a>
       
-      <!-- Controls Right Side: Live Status & Hamburger Menu -->
+      <!-- Controls Right Side -->
       <div class="flex items-center gap-6">
         <div class="hidden sm:flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span class="text-xs text-neutral-400 uppercase tracking-wider">ENGINE SECURE</span>
+          <span id="auth-greeting" class="text-xs text-amber-500 uppercase tracking-wider ml-4 hidden font-bold"></span>
         </div>
-
+        
         <!-- Hamburger Menu Container -->
         <div class="relative">
           <button id="user-menu-btn" class="p-2 text-neutral-400 hover:text-amber-500 hover:bg-neutral-800/50 rounded-lg transition-all focus:outline-none">
@@ -122,18 +103,27 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-
+          
           <!-- Dropdown Menu -->
           <div id="user-dropdown" class="hidden absolute right-0 mt-3 w-56 bg-dark-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-50">
             <div class="px-4 py-3 border-b border-neutral-800 bg-neutral-950/50">
-              <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest">Account Settings</p>
+              <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest">System Access</p>
             </div>
-            <div class="py-1">
-              <a href="#" class="block px-4 py-2.5 text-sm text-neutral-300 hover:bg-amber-500/10 hover:text-amber-500 transition-colors">Change email</a>
-              <a href="#" class="block px-4 py-2.5 text-sm text-neutral-300 hover:bg-amber-500/10 hover:text-amber-500 transition-colors">Change preferred name</a>
+            
+            <!-- Dynamic auth states -->
+            <div id="menu-logged-out" class="py-1">
+              <a href="#" id="menu-btn-signin" class="block px-4 py-2.5 text-sm text-amber-500 hover:bg-amber-500/10 font-bold transition-colors">Sign In / Register</a>
             </div>
-            <div class="border-t border-neutral-800 py-1">
-              <a href="#" class="block px-4 py-2.5 text-sm text-rose-500 hover:bg-rose-500/10 hover:text-rose-400 transition-colors">Log out</a>
+            
+            <div id="menu-logged-in" class="hidden py-1">
+              <a href="#" id="menu-btn-myfiles" class="block px-4 py-2.5 text-sm text-amber-500 hover:bg-amber-500/10 font-bold transition-colors flex justify-between items-center">
+                My Files <span class="text-[10px] bg-amber-500/20 px-1.5 py-0.5 rounded">30D</span>
+              </a>
+              <a href="#" class="block px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-800 transition-colors">Change email</a>
+              <a href="#" class="block px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-800 transition-colors">Change preferred name</a>
+              <div class="border-t border-neutral-800 mt-1 pt-1">
+                <a href="#" id="menu-btn-logout" class="block px-4 py-2.5 text-sm text-rose-500 hover:bg-rose-500/10 transition-colors">Log out</a>
+              </div>
             </div>
           </div>
         </div>
@@ -164,7 +154,6 @@
   <!-- Main Workspace -->
   <main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4 md:p-8">
     <div class="max-w-2xl w-full">
-
       <!-- The Core Interface Panel -->
       <div class="bg-dark-900 border-2 border-neutral-800 rounded-2xl overflow-hidden shadow-2xl relative">
         
@@ -177,7 +166,7 @@
         <div class="absolute bottom-0 left-0 w-[2px] h-8 bg-amber-500"></div>
         <div class="absolute bottom-0 right-0 w-8 h-[2px] bg-amber-500"></div>
         <div class="absolute bottom-0 right-0 w-[2px] h-8 bg-amber-500"></div>
-
+        
         <!-- Utility Bar -->
         <div class="px-6 py-3 border-b border-neutral-800/80 bg-neutral-950/50 flex items-center justify-between text-[11px] text-neutral-500 uppercase tracking-widest">
           <div class="flex items-center gap-2">
@@ -186,7 +175,7 @@
           </div>
           <div class="font-mono">AXE-CORE v2.5-PRO</div>
         </div>
-
+        
         <!-- STATE 1: UPLOAD & CONFIGURATION -->
         <div id="state-upload" class="p-6 md:p-8 space-y-8">
           
@@ -198,7 +187,7 @@
               Drag and drop your bulky PDF or DOCX file to compress it securely.
             </p>
           </div>
-
+          
           <!-- Drag & Drop Zone -->
           <div id="drop-zone" class="border-2 border-dashed border-neutral-800 hover:border-amber-500/50 bg-neutral-950/40 rounded-xl p-8 text-center transition-all duration-200 cursor-pointer relative group overflow-hidden">
             <input type="file" id="file-input" class="hidden" accept=".pdf,.docx">
@@ -209,14 +198,12 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
               </div>
-
               <div id="drop-zone-text" class="space-y-1">
                 <p class="text-sm font-medium text-neutral-200">
                   <span class="text-amber-500 font-bold group-hover:underline">Click to browse</span> or drop file here
                 </p>
                 <p class="text-xs text-neutral-500">PDF or DOCX documents up to 100MB</p>
               </div>
-
               <!-- Selected File Display -->
               <div id="file-info" class="hidden max-w-md mx-auto bg-neutral-900 border border-neutral-800 p-3 rounded-lg flex items-center justify-between text-left">
                 <div class="flex items-center gap-3 overflow-hidden">
@@ -241,74 +228,48 @@
               </div>
             </div>
           </div>
-
-          <!-- Redesigned Single-Rectangle Compression Control -->
+          
           <div class="space-y-3">
             <label class="text-xs font-bold text-neutral-400 uppercase tracking-widest block text-center sm:text-left">Compression Intensity</label>
-            
             <div class="relative bg-neutral-950/80 border border-neutral-800 rounded-xl p-1 flex items-stretch">
-              
-              <!-- Minimum -->
               <label class="flex-1 relative cursor-pointer text-center group">
                 <input type="radio" name="compressionLevel" value="low" class="sr-only peer">
-                <div class="py-3 px-1 rounded-lg text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-widest transition-all duration-300 border border-transparent peer-checked:text-amber-500 peer-checked:bg-amber-500/10 peer-checked:shadow-neon-amber-inset peer-checked:border-amber-500/50 group-hover:text-neutral-300">
-                  Minimum
-                </div>
+                <div class="py-3 px-1 rounded-lg text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-widest transition-all duration-300 border border-transparent peer-checked:text-amber-500 peer-checked:bg-amber-500/10 peer-checked:shadow-neon-amber-inset peer-checked:border-amber-500/50 group-hover:text-neutral-300">Minimum</div>
               </label>
-
-              <!-- Medium -->
               <label class="flex-1 relative cursor-pointer text-center group">
                 <input type="radio" name="compressionLevel" value="medium" checked class="sr-only peer">
-                <!-- Divider -->
                 <div class="absolute left-0 top-3 bottom-3 w-px bg-neutral-800 peer-checked:opacity-0 transition-opacity"></div>
-                <div class="py-3 px-1 rounded-lg text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-widest transition-all duration-300 border border-transparent peer-checked:text-amber-500 peer-checked:bg-amber-500/10 peer-checked:shadow-neon-amber-inset peer-checked:border-amber-500/50 group-hover:text-neutral-300">
-                  Medium
-                </div>
+                <div class="py-3 px-1 rounded-lg text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-widest transition-all duration-300 border border-transparent peer-checked:text-amber-500 peer-checked:bg-amber-500/10 peer-checked:shadow-neon-amber-inset peer-checked:border-amber-500/50 group-hover:text-neutral-300">Medium</div>
               </label>
-
-              <!-- High -->
               <label class="flex-1 relative cursor-pointer text-center group">
                 <input type="radio" name="compressionLevel" value="high" class="sr-only peer">
-                <!-- Divider -->
                 <div class="absolute left-0 top-3 bottom-3 w-px bg-neutral-800 peer-checked:opacity-0 transition-opacity"></div>
-                <div class="py-3 px-1 rounded-lg text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-widest transition-all duration-300 border border-transparent peer-checked:text-amber-500 peer-checked:bg-amber-500/10 peer-checked:shadow-neon-amber-inset peer-checked:border-amber-500/50 group-hover:text-neutral-300">
-                  High
-                </div>
+                <div class="py-3 px-1 rounded-lg text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-widest transition-all duration-300 border border-transparent peer-checked:text-amber-500 peer-checked:bg-amber-500/10 peer-checked:shadow-neon-amber-inset peer-checked:border-amber-500/50 group-hover:text-neutral-300">High</div>
               </label>
-
             </div>
           </div>
-
-          <!-- Action Button -->
+          
           <button id="compress-btn" disabled class="w-full bg-neutral-800 text-neutral-500 font-display font-black text-sm uppercase tracking-widest py-4 rounded-xl border border-neutral-700/50 transition-all duration-300 disabled:cursor-not-allowed hover:bg-amber-500 hover:text-black hover:shadow-neon-amber-strong">
             COMPRESS DOCUMENT
           </button>
         </div>
-
+        
         <!-- STATE 2: PROCESSING & COMPRESSING STAGES -->
         <div id="state-processing" class="p-6 md:p-8 space-y-8 hidden">
           
-          <!-- Processing Visual Core (GIF swap zone) -->
+          <!-- Processing Visual Core -->
           <div class="relative w-full aspect-video md:aspect-[21/9] bg-black/60 border border-neutral-800 rounded-xl overflow-hidden flex items-center justify-center">
-            
             <div id="processing-laser" class="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent shadow-[0_0_8px_rgba(245,158,11,0.8)] z-20 laser-line"></div>
             
-            <!-- 1. Active Looping visual -->
             <div id="processing-active-img-wrapper" class="absolute inset-0 flex items-center justify-center p-4">
-              <!-- Replace src with active loop GIF URL -->
               <img id="processing-gif" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect fill='none' stroke='%23f59e0b' stroke-width='4' x='25' y='25' width='50' height='50'><animate attributeName='opacity' values='0.3;1;0.3' dur='1.5s' repeatCount='indefinite'/></rect><path d='M20 50 L80 50' stroke='%23f59e0b' stroke-width='2' stroke-dasharray='5 5'><animate attributeName='stroke-dashoffset' values='0;10' dur='1s' repeatCount='indefinite'/></path></svg>" class="max-h-full max-w-full object-contain filter grayscale contrast-125 opacity-80" alt="Processing loop"/>
             </div>
-
-            <!-- 2. Done Static Visual -->
             <div id="processing-success-img-wrapper" class="absolute inset-0 flex items-center justify-center p-4 hidden bg-amber-500/[0.02]">
-              <!-- Replace src with static done image URL -->
               <img id="success-static-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='20' fill='none' stroke='%2310b981' stroke-width='4'/><path d='M42 50 L48 56 L58 44' fill='none' stroke='%2310b981' stroke-width='4'/></svg>" class="max-h-full max-w-full object-contain" alt="Finished"/>
             </div>
-
             <div class="absolute inset-0 scanlines pointer-events-none mix-blend-overlay"></div>
           </div>
-
-          <!-- Progress Logs Terminal -->
+          
           <div class="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3">
             <div class="flex items-center justify-between border-b border-neutral-800/80 pb-2 text-[10px] text-neutral-500 uppercase font-bold tracking-widest">
               <span>AXE Blade Logs</span>
@@ -318,8 +279,23 @@
               <div class="text-amber-500">&gt; Securing active server core session...</div>
             </div>
           </div>
+          
+          <!-- Cloud Save Guest Lead-Gen (Appears only post-compression if logged out) -->
+          <div id="post-compression-save-prompt" class="hidden border border-amber-500/30 bg-amber-500/5 p-4 rounded-xl flex-col gap-3">
+            <div class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
+              <div>
+                <p class="text-xs font-bold text-amber-500 uppercase tracking-widest">Save this file to the cloud?</p>
+                <p class="text-xs text-neutral-300 mt-1">Access this file for 30 days securely + get future Impulse tool updates.</p>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <input type="email" id="post-prompt-email" placeholder="Enter your email" class="flex-1 bg-dark-900 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 focus:shadow-neon-amber transition-all">
+              <button id="post-prompt-submit" class="bg-amber-500 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-amber-400 transition-colors">Send Link</button>
+            </div>
+            <button id="post-prompt-skip" class="text-[10px] text-neutral-500 uppercase tracking-wider hover:text-white mt-1 text-left self-start">Skip, I'll just download it now.</button>
+          </div>
 
-          <!-- Statistics Box -->
           <div id="reduction-statistics-box" class="grid grid-cols-2 gap-4 border border-neutral-800 bg-neutral-950/40 p-4 rounded-xl hidden">
             <div>
               <p class="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Before AXE</p>
@@ -330,8 +306,7 @@
               <p id="stat-after-size" class="text-xl font-bold text-amber-500 mt-1">Processing...</p>
             </div>
           </div>
-
-          <!-- Dynamic Operations Actions -->
+          
           <div class="flex flex-col sm:flex-row gap-3">
             <a id="download-result-btn" href="#" class="flex-1 bg-amber-500 text-black font-display font-black text-sm uppercase tracking-widest py-4 rounded-xl border border-amber-600 transition-all text-center hover:bg-amber-400 hover:shadow-neon-amber-strong hidden">
               DOWNLOAD SEVERED FILE
@@ -341,7 +316,7 @@
             </button>
           </div>
         </div>
-
+        
         <!-- STATE 3: ERROR STATE -->
         <div id="state-error" class="p-6 md:p-8 space-y-6 hidden text-center">
           <div class="w-16 h-16 bg-rose-500/10 border border-rose-500 text-rose-500 flex items-center justify-center mx-auto rounded-full">
@@ -359,9 +334,8 @@
             TRY AGAIN
           </button>
         </div>
-
       </div>
-
+      
       <!-- Persistent "Beep" Disclaimer Section -->
       <div class="mt-8 text-center max-w-lg mx-auto border-t border-b border-neutral-800/40 py-3 relative h-10 flex items-center justify-center overflow-hidden">
         <div id="disclaimer-container" class="w-full transition-all duration-150">
@@ -376,26 +350,243 @@
           </p>
         </div>
       </div>
-
     </div>
   </main>
 
-  <!-- Technical Brand Footer (IMPULSE branding) -->
+  <!-- Technical Brand Footer -->
   <footer class="relative z-10 border-t border-neutral-800/40 bg-neutral-950/60 py-6 px-6 text-center">
     <div class="max-w-6xl mx-auto">
       <p class="text-xs text-neutral-500 tracking-wider">
         Brought to you by 
-        <!-- TO-DO: Replace #REPLACE_WITH_IMPULSE_LINK with actual IMPULSE link -->
-        <a href="#REPLACE_WITH_IMPULSE_LINK" class="font-display font-extrabold text-amber-500 hover:text-white transition-colors duration-300">
-          IMPULSE
-        </a>
+        <a href="#REPLACE_WITH_IMPULSE_LINK" class="font-display font-extrabold text-amber-500 hover:text-white transition-colors duration-300">IMPULSE</a>
       </p>
     </div>
   </footer>
 
+  <!-- Auth Modal -->
+  <div id="auth-modal" class="fixed inset-0 z-[100] hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-dark-900 border border-neutral-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="auth-modal-content">
+      <div class="p-6 border-b border-neutral-800/60 flex justify-between items-center bg-neutral-950/50">
+        <h3 class="font-display font-bold text-white uppercase tracking-widest">System Access</h3>
+        <button id="auth-modal-close" class="text-neutral-500 hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <p class="text-xs text-neutral-400">Authenticate via Magic Link to save compressed documents for 30 days and manage preferences.</p>
+        <div>
+          <label class="block text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">Secure Email</label>
+          <input type="email" id="auth-email-input" placeholder="operative@impulse.com" class="w-full bg-dark-950 border border-neutral-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:shadow-neon-amber transition-all">
+        </div>
+        <button id="auth-submit-btn" class="w-full bg-amber-500 text-black px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-amber-400 transition-colors mt-2">
+          Send Magic Link
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Files Modal -->
+  <div id="files-modal" class="fixed inset-0 z-[100] hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-dark-900 border border-neutral-800 w-full max-w-2xl max-h-[80vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="files-modal-content">
+      <div class="p-6 border-b border-neutral-800/60 flex justify-between items-center bg-neutral-950/50">
+        <div>
+          <h3 class="font-display font-bold text-white uppercase tracking-widest">My Files Archive</h3>
+          <p class="text-[10px] text-amber-500 uppercase tracking-wider mt-1">30-Day Retention Policy</p>
+        </div>
+        <button id="files-modal-close" class="text-neutral-500 hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="p-0 overflow-y-auto flex-1 bg-dark-950">
+        <ul id="files-list-container" class="divide-y divide-neutral-800">
+          <!-- Files populate here -->
+          <li class="p-8 text-center text-xs text-neutral-500 italic">Initializing archive records...</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
   <!-- Application Logic -->
   <script>
-    // State UI & DOM Node Queries
+    // ----------------------------------------------------
+    // 1. SUPABASE INITIALIZATION
+    // ----------------------------------------------------
+    // PLACEHOLDERS: Replace these with your actual Supabase project credentials.
+    const SUPABASE_URL = 'https://nkujmjrjazwyxxwutxok.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_U9zBBZ8haEbkJuhLUbKyhQ_T7UTwp_J';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let activeUserSession = null;
+
+    // ----------------------------------------------------
+    // 2. AUTHENTICATION & UI SYNC LOGIC
+    // ----------------------------------------------------
+    async function checkSession() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      activeUserSession = session;
+      updateUIForAuth(session);
+    }
+
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      activeUserSession = session;
+      updateUIForAuth(session);
+    });
+
+    function updateUIForAuth(session) {
+      const menuLoggedOut = document.getElementById('menu-logged-out');
+      const menuLoggedIn = document.getElementById('menu-logged-in');
+      const authGreeting = document.getElementById('auth-greeting');
+      
+      if (session && session.user) {
+        menuLoggedOut.classList.add('hidden');
+        menuLoggedIn.classList.remove('hidden');
+        authGreeting.innerText = `Welcome, ${session.user.email.split('@')[0]}`;
+        authGreeting.classList.remove('hidden');
+      } else {
+        menuLoggedOut.classList.remove('hidden');
+        menuLoggedIn.classList.add('hidden');
+        authGreeting.classList.add('hidden');
+        authGreeting.innerText = '';
+      }
+    }
+
+    // Modal Triggers
+    const authModal = document.getElementById('auth-modal');
+    const authModalContent = document.getElementById('auth-modal-content');
+    
+    function openAuthModal() {
+      authModal.classList.remove('hidden');
+      // small delay to allow display block before opacity transition
+      setTimeout(() => {
+        authModal.classList.remove('opacity-0');
+        authModalContent.classList.remove('scale-95');
+      }, 10);
+    }
+    
+    function closeAuthModal() {
+      authModal.classList.add('opacity-0');
+      authModalContent.classList.add('scale-95');
+      setTimeout(() => { authModal.classList.add('hidden'); }, 300);
+    }
+
+    document.getElementById('menu-btn-signin').addEventListener('click', (e) => {
+      e.preventDefault(); openAuthModal(); document.getElementById('user-dropdown').classList.add('hidden');
+    });
+    
+    document.getElementById('auth-modal-close').addEventListener('click', closeAuthModal);
+    
+    // Magic Link Trigger
+    document.getElementById('auth-submit-btn').addEventListener('click', async () => {
+      const email = document.getElementById('auth-email-input').value;
+      if (!email) return showToast('Error', 'Please enter a valid email.', 'rose');
+      
+      const btn = document.getElementById('auth-submit-btn');
+      btn.innerText = "Transmitting..."; btn.disabled = true;
+
+      const { error } = await supabaseClient.auth.signInWithOtp({ email });
+      if (error) {
+        showToast('Auth Error', error.message, 'rose');
+        btn.innerText = "Send Magic Link"; btn.disabled = false;
+      } else {
+        showToast('Link Dispatched', 'Check your inbox to secure access.', 'emerald');
+        setTimeout(closeAuthModal, 2000);
+        btn.innerText = "Sent!";
+      }
+    });
+
+    document.getElementById('menu-btn-logout').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await supabaseClient.auth.signOut();
+      showToast('Logged Out', 'System access revoked safely.', 'amber');
+      document.getElementById('user-dropdown').classList.add('hidden');
+    });
+
+    // ----------------------------------------------------
+    // 3. MY FILES ARCHIVE MODAL LOGIC
+    // ----------------------------------------------------
+    const filesModal = document.getElementById('files-modal');
+    const filesModalContent = document.getElementById('files-modal-content');
+    
+    document.getElementById('menu-btn-myfiles').addEventListener('click', async (e) => {
+      e.preventDefault();
+      document.getElementById('user-dropdown').classList.add('hidden');
+      filesModal.classList.remove('hidden');
+      setTimeout(() => { filesModal.classList.remove('opacity-0'); filesModalContent.classList.remove('scale-95'); }, 10);
+      
+      loadMyFiles();
+    });
+
+    document.getElementById('files-modal-close').addEventListener('click', () => {
+      filesModal.classList.add('opacity-0'); filesModalContent.classList.add('scale-95');
+      setTimeout(() => { filesModal.classList.add('hidden'); }, 300);
+    });
+
+    async function loadMyFiles() {
+      const listContainer = document.getElementById('files-list-container');
+      listContainer.innerHTML = '<li class="p-8 text-center text-xs text-neutral-500 animate-pulse">Decrypting archives...</li>';
+
+      const { data: files, error } = await supabaseClient.from('files').select('*').order('created_at', { ascending: false });
+      
+      if (error) {
+        listContainer.innerHTML = `<li class="p-8 text-center text-xs text-rose-500">Error loading files: ${error.message}</li>`;
+        return;
+      }
+
+      if (!files || files.length === 0) {
+        listContainer.innerHTML = '<li class="p-8 text-center text-xs text-neutral-500">Your secure 30-day archive is currently empty.</li>';
+        return;
+      }
+
+      listContainer.innerHTML = '';
+      for (const f of files) {
+        const expiryDate = new Date(f.expires_at);
+        const daysLeft = Math.max(0, Math.ceil((expiryDate - new Date()) / (1000 * 60 * 60 * 24)));
+        const reduction = f.original_size ? (((f.original_size - f.compressed_size)/f.original_size)*100).toFixed(1) : 0;
+        
+        const li = document.createElement('li');
+        li.className = "p-4 sm:px-6 hover:bg-neutral-900/50 flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-colors";
+        li.innerHTML = `
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-white truncate">${f.filename}</p>
+            <p class="text-xs text-neutral-500 mt-1">${formatBytes(f.compressed_size)} (Reduced by ${reduction}%) • <span class="text-amber-500 font-bold">${daysLeft} days left</span></p>
+          </div>
+          <button class="download-cloud-btn shrink-0 bg-neutral-800 hover:bg-amber-500 hover:text-black border border-neutral-700 text-xs uppercase tracking-wider font-bold px-4 py-2 rounded-lg transition-all" data-path="${f.storage_path}">
+            Download
+          </button>
+        `;
+        listContainer.appendChild(li);
+      }
+
+      // Bind download clicks for signed URLs
+      document.querySelectorAll('.download-cloud-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const path = e.target.getAttribute('data-path');
+          const origText = e.target.innerText;
+          e.target.innerText = 'Signing...';
+          
+          const { data, error } = await supabaseClient.storage.from('compressed-files').createSignedUrl(path, 3600); // 1 hour signed URL
+          if (error || !data) {
+            showToast('Download Error', 'Could not secure file link.', 'rose');
+            e.target.innerText = origText;
+            return;
+          }
+          
+          // Trigger download
+          window.location.href = data.signedUrl;
+          e.target.innerText = 'Downloaded';
+          setTimeout(() => { e.target.innerText = origText; }, 2000);
+        });
+      });
+    }
+
+    // Initialize session logic on load
+    window.addEventListener('DOMContentLoaded', checkSession);
+
+    // ----------------------------------------------------
+    // 4. EXISTING COMPRESSION & APP LOGIC
+    // ----------------------------------------------------
+    
+    // Core Layout Nodes
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
     const dropZoneText = document.getElementById('drop-zone-text');
@@ -405,10 +596,8 @@
     const removeFileBtn = document.getElementById('remove-file-btn');
     const docIconPdf = document.getElementById('doc-icon-pdf');
     const docIconWord = document.getElementById('doc-icon-word');
-    
     const compressBtn = document.getElementById('compress-btn');
     const systemStatusText = document.getElementById('system-status-text');
-    
     const stateUpload = document.getElementById('state-upload');
     const stateProcessing = document.getElementById('state-processing');
     const stateError = document.getElementById('state-error');
@@ -426,55 +615,37 @@
     const downloadResultBtn = document.getElementById('download-result-btn');
     const restartAxeBtn = document.getElementById('restart-axe-btn');
     const retryAxeBtn = document.getElementById('retry-axe-btn');
+
+    // Post-compression save prompt elements
+    const postCompressionSavePrompt = document.getElementById('post-compression-save-prompt');
+    const postPromptSubmitBtn = document.getElementById('post-prompt-submit');
     
-    // Hamburger Menu Logic
+    // Hamburger Menu Core Toggle
     const userMenuBtn = document.getElementById('user-menu-btn');
     const userDropdown = document.getElementById('user-dropdown');
-    
-    userMenuBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      userDropdown.classList.toggle('hidden');
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!userDropdown.contains(e.target) && !userMenuBtn.contains(e.target)) {
-        userDropdown.classList.add('hidden');
-      }
-    });
+    userMenuBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('hidden'); });
+    document.addEventListener('click', (e) => { if (!userDropdown.contains(e.target) && !userMenuBtn.contains(e.target)) userDropdown.classList.add('hidden'); });
 
     // Disclaimer "Beep" Rotator Logic
     const disclaimers = document.querySelectorAll('.axe-disclaimer');
     const disclaimerContainer = document.getElementById('disclaimer-container');
     let currentDisclaimerIndex = 0;
-
     setInterval(() => {
-      // Execute beep visual flash
       disclaimerContainer.classList.add('beep-flash', 'text-amber-500');
-      
-      // Swap text precisely halfway through the fast animation
       setTimeout(() => {
         disclaimers[currentDisclaimerIndex].classList.add('hidden');
         currentDisclaimerIndex = (currentDisclaimerIndex + 1) % disclaimers.length;
         disclaimers[currentDisclaimerIndex].classList.remove('hidden');
       }, 75); 
-
-      // Remove class so it can be re-triggered
-      setTimeout(() => {
-        disclaimerContainer.classList.remove('beep-flash', 'text-amber-500');
-      }, 150);
+      setTimeout(() => { disclaimerContainer.classList.remove('beep-flash', 'text-amber-500'); }, 150);
     }, 4500);
 
-    // Local state variables
     let selectedFile = null;
     let currentJobId = null;
     let pollingInterval = null;
     let wakeLock = null;
-
     const LOCAL_STORAGE_KEY = 'axe_pending_job';
 
-    /* ==========================================================
-       1. INITIALIZATION & RECOVERY LOOPS
-       ========================================================== */
     window.addEventListener('load', () => {
       const savedJobId = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (savedJobId) {
@@ -484,140 +655,74 @@
       }
     });
 
-    /* ==========================================================
-       2. NOTIFICATION SYSTEM
-       ========================================================== */
     function showToast(title, message, theme = 'amber') {
       const banner = document.getElementById('notification-banner');
-      const titleEl = document.getElementById('notification-title');
-      const msgEl = document.getElementById('notification-message');
-      
-      titleEl.innerText = title.toUpperCase();
-      msgEl.innerText = message;
-      
-      banner.style.opacity = '1';
-      banner.style.transform = 'translateX(0)';
-      
-      setTimeout(() => dismissNotification(), 5000);
+      document.getElementById('notification-title').innerText = title.toUpperCase();
+      document.getElementById('notification-message').innerText = message;
+      banner.style.opacity = '1'; banner.style.transform = 'translateX(0)';
+      setTimeout(() => { banner.style.opacity = '0'; banner.style.transform = 'translateX(20rem)'; }, 5000);
     }
-
     function dismissNotification() {
       const banner = document.getElementById('notification-banner');
-      banner.style.opacity = '0';
-      banner.style.transform = 'translateX(20rem)';
+      banner.style.opacity = '0'; banner.style.transform = 'translateX(20rem)';
     }
 
-    /* ==========================================================
-       3. DRAG & DROP + SELECTION ACTIONS
-       ========================================================== */
-    dropZone.addEventListener('click', (e) => {
-      if (!e.target.closest('#remove-file-btn')) {
-        fileInput.click();
-      }
-    });
-
+    dropZone.addEventListener('click', (e) => { if (!e.target.closest('#remove-file-btn')) fileInput.click(); });
+    
     function handleFileSelection(file) {
       if (!file) return;
-
       const extension = file.name.split('.').pop().toLowerCase();
-      if (extension !== 'pdf' && extension !== 'docx') {
-        showToast("Invalid Input", "We only accept .pdf or .docx files for dynamic severing.", "rose");
-        return;
-      }
-
+      if (extension !== 'pdf' && extension !== 'docx') return showToast("Invalid Input", "We only accept .pdf or .docx files for dynamic severing.", "rose");
+      
       selectedFile = file;
       fileName.innerText = file.name;
       fileSize.innerText = formatBytes(file.size);
-
-      if (extension === 'pdf') {
-        docIconPdf.classList.remove('hidden');
-        docIconWord.classList.add('hidden');
-      } else {
-        docIconWord.classList.remove('hidden');
-        docIconPdf.classList.add('hidden');
-      }
-
-      dropZoneText.classList.add('hidden');
-      fileInfo.classList.remove('hidden');
       
+      if (extension === 'pdf') { docIconPdf.classList.remove('hidden'); docIconWord.classList.add('hidden'); } 
+      else { docIconWord.classList.remove('hidden'); docIconPdf.classList.add('hidden'); }
+      
+      dropZoneText.classList.add('hidden'); fileInfo.classList.remove('hidden');
       compressBtn.disabled = false;
       compressBtn.classList.remove('bg-neutral-800', 'text-neutral-500', 'border-neutral-700/50');
       compressBtn.classList.add('bg-amber-500', 'text-black', 'border-amber-600', 'cursor-pointer');
-      
       systemStatusText.innerText = "Target Locked";
     }
 
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        dropZone.classList.add('border-amber-500', 'bg-amber-500/5', 'shadow-neon-amber');
-      }, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('border-amber-500', 'bg-amber-500/5', 'shadow-neon-amber');
-      }, false);
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      const dt = e.dataTransfer;
-      const file = dt.files[0];
-      handleFileSelection(file);
-    });
-
-    fileInput.addEventListener('change', (e) => {
-      handleFileSelection(e.target.files[0]);
-    });
-
-    removeFileBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      resetUploadInputs();
-    });
-
+    ['dragenter', 'dragover'].forEach(eventName => { dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.add('border-amber-500', 'bg-amber-500/5', 'shadow-neon-amber'); }, false); });
+    ['dragleave', 'drop'].forEach(eventName => { dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.remove('border-amber-500', 'bg-amber-500/5', 'shadow-neon-amber'); }, false); });
+    dropZone.addEventListener('drop', (e) => { const dt = e.dataTransfer; handleFileSelection(dt.files[0]); });
+    fileInput.addEventListener('change', (e) => { handleFileSelection(e.target.files[0]); });
+    
+    removeFileBtn.addEventListener('click', (e) => { e.stopPropagation(); resetUploadInputs(); });
+    
     function resetUploadInputs() {
-      selectedFile = null;
-      fileInput.value = '';
-      fileInfo.classList.add('hidden');
-      dropZoneText.classList.remove('hidden');
+      selectedFile = null; fileInput.value = '';
+      fileInfo.classList.add('hidden'); dropZoneText.classList.remove('hidden');
       compressBtn.disabled = true;
       compressBtn.classList.add('bg-neutral-800', 'text-neutral-500', 'border-neutral-700/50');
       compressBtn.classList.remove('bg-amber-500', 'text-black', 'border-amber-600', 'cursor-pointer');
       systemStatusText.innerText = "System Ready";
     }
 
-    /* ==========================================================
-       4. SERVER PROCESSING HOOKS
-       ========================================================== */
     window.startChopping = function() {
-      stateUpload.classList.add('hidden');
-      stateError.classList.add('hidden');
-      stateProcessing.classList.remove('hidden');
-      
-      processingActiveImgWrapper.classList.remove('hidden');
-      processingSuccessImgWrapper.classList.add('hidden');
-      processingLaser.classList.remove('hidden');
-
-      statsBox.classList.add('hidden');
-      downloadResultBtn.classList.add('hidden');
-      restartAxeBtn.classList.add('hidden');
-      
+      stateUpload.classList.add('hidden'); stateError.classList.add('hidden'); stateProcessing.classList.remove('hidden');
+      processingActiveImgWrapper.classList.remove('hidden'); processingSuccessImgWrapper.classList.add('hidden'); processingLaser.classList.remove('hidden');
+      statsBox.classList.add('hidden'); downloadResultBtn.classList.add('hidden'); restartAxeBtn.classList.add('hidden');
+      postCompressionSavePrompt.classList.add('hidden');
       systemStatusText.innerText = "Severing Excess Details";
     }
-
+    
     window.finishChopping = function() {
-      processingActiveImgWrapper.classList.add('hidden');
-      processingSuccessImgWrapper.classList.remove('hidden');
-      processingLaser.classList.add('hidden');
-
-      statsBox.classList.remove('hidden');
-      downloadResultBtn.classList.remove('hidden');
-      restartAxeBtn.classList.remove('hidden');
-
+      processingActiveImgWrapper.classList.add('hidden'); processingSuccessImgWrapper.classList.remove('hidden'); processingLaser.classList.add('hidden');
+      statsBox.classList.remove('hidden'); downloadResultBtn.classList.remove('hidden'); restartAxeBtn.classList.remove('hidden');
       systemStatusText.innerText = "Sever Complete";
+      
+      // If user is anonymous, expose the post-compression cloud save prompt lead gen.
+      if (!activeUserSession) {
+        postCompressionSavePrompt.classList.remove('hidden');
+      }
     }
-
+    
     window.pushLog = function(message) {
       const line = document.createElement('div');
       line.innerHTML = `<span class="text-neutral-500">&gt;</span> ${message}`;
@@ -625,44 +730,43 @@
       logTerminal.scrollTop = logTerminal.scrollHeight;
     }
 
-    /* ==========================================================
-       5. ACTIVE COMPRESSION LOGIC
-       ========================================================== */
     compressBtn.addEventListener('click', async () => {
       if (!selectedFile) return;
-
       const compLevel = document.querySelector('input[name="compressionLevel"]:checked').value;
       const formData = new FormData();
       formData.append('file', selectedFile);
       formData.append('compressionLevel', compLevel);
-
+      
       window.startChopping();
       window.pushLog(`Acquiring upload target: ${selectedFile.name}...`);
       window.pushLog(`Setting blade tension speed to: [${compLevel.toUpperCase()}]`);
-
+      
       await requestWakeLock();
-
+      
       try {
-        const response = await fetch('/compress', {
-          method: 'POST',
-          body: formData
-        });
+        const headers = {};
+        // AUTHENTICATION SECURE HOOK: Inject Bearer token if session exists
+        if (activeUserSession?.access_token) {
+          headers['Authorization'] = `Bearer ${activeUserSession.access_token}`;
+          window.pushLog('Injecting secure session token for 30-day cloud save...');
+        } else {
+          window.pushLog('Anonymous mode: No cloud save will occur.');
+        }
 
+        const response = await fetch('/compress', { method: 'POST', headers: headers, body: formData });
         await releaseWakeLock();
-
+        
         if (!response.ok) throw new Error(`Upload aborted: Server returned status code ${response.status}`);
-
+        
         const data = await response.json();
         if (data.jobId) {
           currentJobId = data.jobId;
           localStorage.setItem(LOCAL_STORAGE_KEY, currentJobId);
           window.pushLog(`Job registered successfully under ID: ${currentJobId}`);
-          
           startJobTracking(currentJobId);
         } else {
           throw new Error('Server response failed to assign a unique jobId.');
         }
-
       } catch (error) {
         await releaseWakeLock();
         handleProcessingFailure(error.message);
@@ -670,128 +774,92 @@
     });
 
     function startJobTracking(jobId) {
-      currentJobId = jobId;
-      jobIdIndicator.innerText = `ID: ${jobId}`;
-      
-      if (!stateUpload.classList.contains('hidden')) {
-        window.startChopping();
-      }
-
+      currentJobId = jobId; jobIdIndicator.innerText = `ID: ${jobId}`;
+      if (!stateUpload.classList.contains('hidden')) window.startChopping();
       if (pollingInterval) clearInterval(pollingInterval);
-
       pollJobStatus(jobId);
-      pollingInterval = setInterval(() => {
-        pollJobStatus(jobId);
-      }, 2000);
+      pollingInterval = setInterval(() => { pollJobStatus(jobId); }, 2000);
     }
 
     async function pollJobStatus(jobId) {
       try {
         const response = await fetch(`/status/${jobId}`);
         if (!response.ok) throw new Error(`Server status tracking returned HTTP state error: ${response.status}`);
-
         const data = await response.json();
         
         if (data.logs && data.logs.length > 0) {
           logTerminal.innerHTML = '';
           data.logs.forEach(msg => window.pushLog(msg));
         }
-
+        
         if (data.status === 'processing') {
           window.pushLog('Polling pipeline active... Engine cutting process running.');
         } else if (data.status === 'done') {
-          clearInterval(pollingInterval);
-          localStorage.removeItem(LOCAL_STORAGE_KEY);
-          
-          window.pushLog(`Document successfully cut and optimized!`);
+          clearInterval(pollingInterval); localStorage.removeItem(LOCAL_STORAGE_KEY);
           
           statBeforeSize.innerText = formatBytes(data.originalSize || 0);
           if (data.compressedSize) {
             statAfterSize.innerText = formatBytes(data.compressedSize);
-            const ratio = ((data.originalSize - data.compressedSize) / data.originalSize * 100).toFixed(1);
-            window.pushLog(`Calculated weight loss ratio: ${ratio}% smaller.`);
           } else {
             statAfterSize.innerText = 'Reduced';
           }
-
+          
           downloadResultBtn.href = `/download/${jobId}`;
           window.finishChopping();
           showToast("Success", "File cut complete. Ready for download.", "amber");
-
         } else if (data.status === 'error') {
-          clearInterval(pollingInterval);
-          localStorage.removeItem(LOCAL_STORAGE_KEY);
+          clearInterval(pollingInterval); localStorage.removeItem(LOCAL_STORAGE_KEY);
           handleProcessingFailure(data.error || 'Server processing error occurred.');
         }
-
       } catch (error) {
-        clearInterval(pollingInterval);
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        clearInterval(pollingInterval); localStorage.removeItem(LOCAL_STORAGE_KEY);
         handleProcessingFailure(error.message);
       }
     }
 
     function handleProcessingFailure(errString) {
-      stateUpload.classList.add('hidden');
-      stateProcessing.classList.add('hidden');
-      stateError.classList.remove('hidden');
-      
+      stateUpload.classList.add('hidden'); stateProcessing.classList.add('hidden'); stateError.classList.remove('hidden');
       document.getElementById('error-message-text').innerText = errString;
       systemStatusText.innerText = "Operation Aborted";
       showToast("Operation Failed", errString, "rose");
     }
 
-    restartAxeBtn.addEventListener('click', () => {
-      resetUploadInputs();
-      stateProcessing.classList.add('hidden');
-      stateError.classList.add('hidden');
-      stateUpload.classList.remove('hidden');
+    restartAxeBtn.addEventListener('click', () => { resetUploadInputs(); stateProcessing.classList.add('hidden'); stateError.classList.add('hidden'); stateUpload.classList.remove('hidden'); });
+    retryAxeBtn.addEventListener('click', () => { resetUploadInputs(); stateProcessing.classList.add('hidden'); stateError.classList.add('hidden'); stateUpload.classList.remove('hidden'); });
+
+    // Post-compression prompt handlers
+    document.getElementById('post-prompt-skip').addEventListener('click', () => {
+      postCompressionSavePrompt.classList.add('hidden');
+    });
+    
+    postPromptSubmitBtn.addEventListener('click', async () => {
+      const email = document.getElementById('post-prompt-email').value;
+      if (!email) return showToast('Error', 'Please enter a valid email.', 'rose');
+      
+      postPromptSubmitBtn.innerText = 'Sending...'; postPromptSubmitBtn.disabled = true;
+      const { error } = await supabaseClient.auth.signInWithOtp({ email });
+      if (error) {
+        showToast('Auth Error', error.message, 'rose');
+        postPromptSubmitBtn.innerText = 'Send Link'; postPromptSubmitBtn.disabled = false;
+      } else {
+        postCompressionSavePrompt.innerHTML = '<p class="text-sm font-bold text-emerald-500 uppercase">Magic Link Dispatched!</p><p class="text-xs text-neutral-300">Check your email to log in for future cloud saves.</p>';
+      }
     });
 
-    retryAxeBtn.addEventListener('click', () => {
-      resetUploadInputs();
-      stateProcessing.classList.add('hidden');
-      stateError.classList.add('hidden');
-      stateUpload.classList.remove('hidden');
-    });
-
-    /* ==========================================================
-       6. WAKE LOCK CAPABILITIES (PRESERVED LOGIC)
-       ========================================================== */
-    async function requestWakeLock() {
-      if ('wakeLock' in navigator) {
-        try { wakeLock = await navigator.wakeLock.request('screen'); } 
-        catch (err) { console.warn(`Could not active WakeLock: ${err.message}`); }
-      }
-    }
-
-    async function releaseWakeLock() {
-      if (wakeLock) {
-        try { await wakeLock.release(); wakeLock = null; } 
-        catch (err) { console.error(err); }
-      }
-    }
-
+    // Wake Lock Integrations
+    async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) { console.warn(`Could not active WakeLock: ${err.message}`); } } }
+    async function releaseWakeLock() { if (wakeLock) { try { await wakeLock.release(); wakeLock = null; } catch (err) { console.error(err); } } }
     document.addEventListener('visibilitychange', async () => {
-      if (wakeLock !== null && document.visibilityState === 'visible') {
-        await requestWakeLock();
-      }
+      if (wakeLock !== null && document.visibilityState === 'visible') await requestWakeLock();
       if (document.visibilityState === 'visible' && currentJobId) {
         const savedJobId = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (savedJobId && !pollingInterval) {
-          startJobTracking(savedJobId);
-        }
+        if (savedJobId && !pollingInterval) startJobTracking(savedJobId);
       }
     });
 
-    /* ==========================================================
-       7. HELPER UTILITIES
-       ========================================================== */
     function formatBytes(bytes, decimals = 2) {
       if (bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const dm = decimals < 0 ? 0 : decimals;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const k = 1024; const dm = decimals < 0 ? 0 : decimals; const sizes = ['Bytes', 'KB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
