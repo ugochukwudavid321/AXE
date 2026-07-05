@@ -1,619 +1,801 @@
+
 <!DOCTYPE html>
+<html lang="en" class="h-full bg-[#0a0a0c] text-neutral-100 selection:bg-amber-500 selection:text-black">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AXE — Compress your documents, fast</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Syne & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>AXE - Compress your documents, fast</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "tertiary-fixed-dim": "#ffb695",
-                        "on-secondary-fixed": "#131b2e",
-                        "on-tertiary": "#ffffff",
-                        "on-secondary": "#ffffff",
-                        "surface-tint": "#4d44e3",
-                        "secondary": "#565e74",
-                        "surface-variant": "#e0e3e5",
-                        "surface-bright": "#f7f9fb",
-                        "surface-container-highest": "#e0e3e5",
-                        "surface-container": "#eceef0",
-                        "on-secondary-container": "#5c647a",
-                        "on-primary-fixed": "#0f0069",
-                        "error": "#ba1a1a",
-                        "inverse-on-surface": "#eff1f3",
-                        "on-primary": "#ffffff",
-                        "on-tertiary-container": "#ffd2be",
-                        "tertiary": "#7e3000",
-                        "primary-fixed-dim": "#c3c0ff",
-                        "inverse-primary": "#c3c0ff",
-                        "secondary-container": "#dae2fd",
-                        "error-container": "#ffdad6",
-                        "outline": "#777587",
-                        "surface-dim": "#d8dadc",
-                        "secondary-fixed": "#dae2fd",
-                        "surface": "#f7f9fb",
-                        "tertiary-container": "#a44100",
-                        "inverse-surface": "#2d3133",
-                        "on-surface-variant": "#464555",
-                        "surface-container-low": "#f2f4f6",
-                        "on-background": "#191c1e",
-                        "primary": "#3525cd",
-                        "on-error-container": "#93000a",
-                        "tertiary-fixed": "#ffdbcc",
-                        "surface-container-high": "#e6e8ea",
-                        "on-tertiary-fixed": "#351000",
-                        "on-surface": "#191c1e",
-                        "on-error": "#ffffff",
-                        "on-tertiary-fixed-variant": "#7b2f00",
-                        "on-primary-container": "#dad7ff",
-                        "surface-container-lowest": "#ffffff",
-                        "outline-variant": "#c7c4d8",
-                        "background": "#f7f9fb",
-                        "secondary-fixed-dim": "#bec6e0",
-                        "on-primary-fixed-variant": "#3323cc",
-                        "on-secondary-fixed-variant": "#3f465c",
-                        "primary-container": "#4f46e5",
-                        "primary-fixed": "#e2dfff"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "spacing": {
-                        "margin-mobile": "16px",
-                        "stack-unit": "8px",
-                        "gutter": "24px",
-                        "card-max": "640px",
-                        "container-max": "1200px"
-                    },
-                    "fontFamily": {
-                        "headline-lg-mobile": ["Geist"],
-                        "label-sm": ["Geist"],
-                        "headline-lg": ["Geist"],
-                        "label-md": ["Geist"],
-                        "body-md": ["Geist"],
-                        "body-lg": ["Geist"],
-                        "headline-md": ["Geist"],
-                        "display": ["Geist"]
-                    },
-                    "fontSize": {
-                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
-                        "label-sm": ["12px", { "lineHeight": "1", "fontWeight": "600" }],
-                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
-                        "label-md": ["14px", { "lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "500" }],
-                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
-                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
-                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
-                        "display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }]
-                    }
-                }
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['JetBrains Mono', 'monospace'],
+            display: ['Syne', 'sans-serif'],
+          },
+          colors: {
+            amber: {
+              50: '#fefbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+              800: '#92400e',
+              900: '#78350f',
+            },
+            dark: {
+              800: '#121215',
+              900: '#0a0a0c',
+              950: '#030304',
             }
+          },
+          boxShadow: {
+            'neon-amber': '0 0 20px rgba(245, 158, 11, 0.15)',
+            'neon-amber-strong': '0 0 30px rgba(245, 158, 11, 0.4)',
+            'neon-amber-inset': 'inset 0 0 15px rgba(245, 158, 11, 0.2)',
+          }
         }
-    </script>
-<style>
-        body { font-family: 'Geist', sans-serif; }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        .shadow-ambient { box-shadow: 0 4px 20px rgba(53, 37, 205, 0.05), 0 1px 3px rgba(0,0,0,0.02); }
-        
-        /* Drag & Drop Visuals */
-        .drop-zone { transition: all 0.2s ease-in-out; }
-        .drop-zone.active { border-color: #3525cd; background-color: rgba(53, 37, 205, 0.03); }
-        .drop-zone.error { border-color: #ba1a1a; background-color: rgba(186, 26, 26, 0.03); }
-        
-        /* Loading Spinner */
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        .spinner { animation: spin 1s linear infinite; }
-    </style>
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0a0c; }
+    ::-webkit-scrollbar-thumb { background: #26262b; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+
+    .grid-bg {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(245, 158, 11, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(245, 158, 11, 0.03) 1px, transparent 1px);
+    }
+
+    .scanlines {
+      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.3));
+      background-size: 100% 4px;
+    }
+
+    @keyframes laser-sweep {
+      0% { transform: translateY(-100%); }
+      50% { transform: translateY(300%); }
+      100% { transform: translateY(-100%); }
+    }
+    .laser-line { animation: laser-sweep 4s infinite linear; }
+    
+    /* Glitch transition utility for disclaimers */
+    .beep-flash { animation: beep 0.15s ease-out; }
+    @keyframes beep {
+      0% { opacity: 1; filter: brightness(1); }
+      50% { opacity: 0.3; filter: brightness(2) sepia(1) hue-rotate(-50deg); transform: scale(0.995); }
+      100% { opacity: 1; filter: brightness(1); transform: scale(1); }
+    }
+  </style>
 </head>
-<body class="bg-background text-on-background min-h-screen flex flex-col antialiased">
-<!-- Top Navigation (From JSON Shared Component) -->
-<nav class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-md">
-<div class="flex justify-between items-center px-gutter py-4 max-w-container-max mx-auto">
-<div class="font-display text-display font-bold text-primary dark:text-inverse-primary text-[28px] tracking-tight">AXE</div>
-<div class="hidden md:flex gap-8 items-center">
-<a class="text-on-surface-variant dark:text-surface-variant font-medium font-label-md text-label-md hover:text-primary dark:hover:text-inverse-primary transition-colors duration-200" href="#">How it works</a>
-<a class="text-on-surface-variant dark:text-surface-variant font-medium font-label-md text-label-md hover:text-primary dark:hover:text-inverse-primary transition-colors duration-200" href="#">Pricing</a>
-<a class="text-on-surface-variant dark:text-surface-variant font-medium font-label-md text-label-md hover:text-primary dark:hover:text-inverse-primary transition-colors duration-200" href="#">API</a>
-</div>
-<button class="font-label-md text-label-md font-medium text-primary dark:text-inverse-primary hover:opacity-80 transition-opacity">Sign In</button>
-</div>
-</nav>
-<!-- Main Content Area -->
-<main class="flex-grow flex items-center justify-center px-margin-mobile md:px-10 pt-24 pb-16">
-<!-- Central Focus Container -->
-<div class="w-full max-w-card-max">
-<!-- Header/Branding -->
-<div class="text-center mb-8">
-<h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">Compress your documents, fast.</h1>
-<p class="font-body-md text-body-md text-on-surface-variant">High-fidelity reduction for PDF and DOCX files without quality loss.</p>
-</div>
-<!-- Elevated Compression Card -->
-<div class="bg-surface-container-lowest rounded-xl shadow-ambient p-8 border border-surface-variant/50">
-<!-- State 1: Upload Zone -->
-<div class="block" id="upload-state">
-<div class="drop-zone border-2 border-dashed border-outline-variant rounded-lg p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary/50 group" id="drop-zone">
-<input accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hidden" id="file-input" type="file"/>
-<div class="w-16 h-16 rounded-full bg-secondary-container text-primary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-<span class="material-symbols-outlined text-[32px]">upload_file</span>
-</div>
-<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Click to upload or drag and drop</h3>
-<p class="font-body-md text-body-md text-on-surface-variant mb-4">Supported formats: PDF, DOCX (Max 50MB)</p>
-<div class="hidden font-label-md text-label-md text-error flex items-center gap-1" id="file-error-msg">
-<span class="material-symbols-outlined text-[16px]">error</span>
-<span>Invalid file type. Please upload a PDF or DOCX.</span>
-</div>
-</div>
-<!-- Selected File Preview (Hidden initially) -->
-<div class="hidden mt-6 p-4 rounded-lg bg-surface-container-low border border-surface-variant flex items-center justify-between" id="file-preview">
-<div class="flex items-center gap-3 overflow-hidden">
-<div class="w-10 h-10 rounded bg-primary-container text-primary flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined" id="file-type-icon">description</span>
-</div>
-<div class="min-w-0">
-<p class="font-label-md text-label-md font-semibold text-on-surface truncate max-w-[200px] md:max-w-[300px]" id="file-name">document.pdf</p>
-<p class="font-label-sm text-label-sm text-on-surface-variant mt-0.5" id="file-badge">PDF detected • 2.4 MB</p>
-</div>
-</div>
-<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container rounded-full transition-colors" id="remove-file-btn">
-<span class="material-symbols-outlined text-[20px]">close</span>
-</button>
-</div>
-<div class="mt-6">
-  <label class="font-label-md text-label-md font-semibold text-on-surface block mb-2">Compression Level</label>
-  <select id="compression-level" class="w-full p-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface">
-    <option value="low">Low — better quality, less reduction</option>
-    <option value="medium" selected>Medium — balanced</option>
-    <option value="high">High — smallest size, lower quality</option>
-  </select>
-</div>
-<!-- Action Button -->
-<div class="mt-8">
-<button class="w-full py-4 px-6 rounded-lg font-label-md text-label-md font-bold text-on-primary bg-outline-variant cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2" disabled="" id="compress-btn">
-<span>Compress File</span>
-<span class="material-symbols-outlined text-[20px]">compress</span>
-</button>
-</div>
-</div>
-<!-- State 2: Processing (Hidden initially) -->
-<div class="hidden py-8 flex flex-col items-center justify-center text-center" id="processing-state">
+<body class="h-full font-sans antialiased bg-dark-950 flex flex-col justify-between overflow-x-hidden relative">
 
-<style>
-    #axe-loading-wrapper {
-        background: #0a0a0a;
-        padding: 24px;
-        width: 300px;
-        border-radius: 10px;
-        box-sizing: border-box;
-    }
-    #axe-typewriter-container {
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 18px;
-        color: #e5a96b;
-        margin-bottom: 16px;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        transition: opacity 0.3s ease;
-    }
-    #axe-typewriter-text.finished { color: #4caf50; }
-    #axe-cursor {
-        display: inline-block;
-        margin-left: 2px;
-        animation: axe-blink 1s step-start infinite;
-    }
-    #axe-typewriter-container.hide-cursor #axe-cursor { display: none; }
-    @keyframes axe-blink { 50% { opacity: 0; } }
-    #axe-terminal {
-        background: #0d0d0d;
-        border: 1px solid #2a2a2a;
-        border-radius: 6px;
-        max-height: 160px;
-        height: 160px;
-        overflow-y: auto;
-        padding: 10px;
-        box-sizing: border-box;
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 12px;
-    }
-    #axe-terminal::-webkit-scrollbar { width: 6px; }
-    #axe-terminal::-webkit-scrollbar-track { background: #0d0d0d; border-radius: 6px; }
-    #axe-terminal::-webkit-scrollbar-thumb { background: #333; border-radius: 6px; }
-    .axe-log-line {
-        color: #666;
-        margin-bottom: 6px;
-        line-height: 1.4;
-        word-wrap: break-word;
-    }
-    .axe-log-line:last-child { color: #aaa; margin-bottom: 0; }
-</style>
+  <!-- Aesthetic Background Layer -->
+  <div class="absolute inset-0 grid-bg pointer-events-none z-0"></div>
+  <div class="absolute top-[-20%] left-[50%] -translate-x-1/2 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
-<div id="axe-loading-wrapper">
-    <div id="axe-typewriter-container">
-        <span id="axe-typewriter-text"></span><span id="axe-cursor">|</span>
+  <!-- Header Section -->
+  <header class="relative z-20 border-b border-neutral-800/60 bg-dark-900/80 backdrop-blur-md px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      
+      <!-- Logo as a Hyperlink -->
+      <!-- TO-DO: Replace #REPLACE_WITH_AXE_LINK with actual AXE homepage/link -->
+      <a href="#REPLACE_WITH_AXE_LINK" class="flex items-center gap-3 group hover:opacity-80 transition-opacity">
+        <div class="w-10 h-10 bg-amber-500 text-black flex items-center justify-center font-display font-extrabold text-2xl tracking-tighter transform -skew-x-12 shadow-neon-amber group-hover:scale-105 transition-transform">
+          A
+        </div>
+        <div>
+          <h1 class="text-xl font-display font-extrabold tracking-widest text-white flex items-center gap-2">
+            AXE <span class="text-xs font-sans font-normal px-2 py-0.5 bg-neutral-800 text-amber-500 rounded border border-neutral-700">v2.0</span>
+          </h1>
+        </div>
+      </a>
+      
+      <!-- Controls Right Side: Live Status & Hamburger Menu -->
+      <div class="flex items-center gap-6">
+        <div class="hidden sm:flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs text-neutral-400 uppercase tracking-wider">ENGINE SECURE</span>
+        </div>
+
+        <!-- Hamburger Menu Container -->
+        <div class="relative">
+          <button id="user-menu-btn" class="p-2 text-neutral-400 hover:text-amber-500 hover:bg-neutral-800/50 rounded-lg transition-all focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div id="user-dropdown" class="hidden absolute right-0 mt-3 w-56 bg-dark-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-50">
+            <div class="px-4 py-3 border-b border-neutral-800 bg-neutral-950/50">
+              <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest">Account Settings</p>
+            </div>
+            <div class="py-1">
+              <a href="#" class="block px-4 py-2.5 text-sm text-neutral-300 hover:bg-amber-500/10 hover:text-amber-500 transition-colors">Change email</a>
+              <a href="#" class="block px-4 py-2.5 text-sm text-neutral-300 hover:bg-amber-500/10 hover:text-amber-500 transition-colors">Change preferred name</a>
+            </div>
+            <div class="border-t border-neutral-800 py-1">
+              <a href="#" class="block px-4 py-2.5 text-sm text-rose-500 hover:bg-rose-500/10 hover:text-rose-400 transition-colors">Log out</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div id="axe-terminal"></div>
-</div>
+  </header>
 
-<script>
-    (function() {
-        let typeTimeout;
-        let phaseTimeout;
-        let isFinished = false;
+  <!-- Notification Banner -->
+  <div id="notification-banner" class="fixed top-6 right-6 z-50 transform translate-x-80 opacity-0 transition-all duration-300 max-w-sm w-full pointer-events-none">
+    <div class="bg-dark-800 border-l-4 border-amber-500 text-white p-4 shadow-2xl rounded-r-lg flex items-start gap-3 pointer-events-auto">
+      <div class="text-amber-500 mt-0.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-500" id="notification-title">Notification</h4>
+        <p class="text-xs text-neutral-300 mt-1" id="notification-message">Action processed successfully.</p>
+      </div>
+      <button onclick="dismissNotification()" class="text-neutral-500 hover:text-white transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
 
-        const textEl = document.getElementById('axe-typewriter-text');
-        const containerEl = document.getElementById('axe-typewriter-container');
-        const terminalEl = document.getElementById('axe-terminal');
+  <!-- Main Workspace -->
+  <main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4 md:p-8">
+    <div class="max-w-2xl w-full">
 
-        function clearTimeouts() {
-            clearTimeout(typeTimeout);
-            clearTimeout(phaseTimeout);
-        }
+      <!-- The Core Interface Panel -->
+      <div class="bg-dark-900 border-2 border-neutral-800 rounded-2xl overflow-hidden shadow-2xl relative">
+        
+        <!-- Frame Accents -->
+        <div class="absolute top-0 left-0 w-8 h-[2px] bg-amber-500"></div>
+        <div class="absolute top-0 left-0 w-[2px] h-8 bg-amber-500"></div>
+        <div class="absolute top-0 right-0 w-8 h-[2px] bg-amber-500"></div>
+        <div class="absolute top-0 right-0 w-[2px] h-8 bg-amber-500"></div>
+        <div class="absolute bottom-0 left-0 w-8 h-[2px] bg-amber-500"></div>
+        <div class="absolute bottom-0 left-0 w-[2px] h-8 bg-amber-500"></div>
+        <div class="absolute bottom-0 right-0 w-8 h-[2px] bg-amber-500"></div>
+        <div class="absolute bottom-0 right-0 w-[2px] h-8 bg-amber-500"></div>
 
-        function typeString(str, speed, callback) {
-            let i = 0;
-            textEl.textContent = '';
-            containerEl.classList.remove('hide-cursor');
+        <!-- Utility Bar -->
+        <div class="px-6 py-3 border-b border-neutral-800/80 bg-neutral-950/50 flex items-center justify-between text-[11px] text-neutral-500 uppercase tracking-widest">
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-1.5 h-1.5 bg-amber-500 rounded-none animate-ping"></span>
+            <span id="system-status-text">System Ready</span>
+          </div>
+          <div class="font-mono">AXE-CORE v2.5-PRO</div>
+        </div>
 
-            function typeNext() {
-                if (isFinished && str !== 'Chopped.') return;
-                if (i < str.length) {
-                    textEl.textContent += str.charAt(i);
-                    i++;
-                    typeTimeout = setTimeout(typeNext, speed);
-                } else {
-                    if (callback) callback();
-                }
-            }
-            typeNext();
-        }
+        <!-- STATE 1: UPLOAD & CONFIGURATION -->
+        <div id="state-upload" class="p-6 md:p-8 space-y-8">
+          
+          <div class="space-y-1 text-center sm:text-left">
+            <h2 class="text-2xl md:text-3xl font-display font-extrabold tracking-wide text-white uppercase">
+              HACK 🪓 YOUR FILE.
+            </h2>
+            <p class="text-xs text-neutral-400">
+              Drag and drop your bulky PDF or DOCX file to compress it securely.
+            </p>
+          </div>
 
-        function startTypewriterLoop() {
-            if (isFinished) return;
-            containerEl.style.opacity = '1';
-            typeString('Hacking your file...', 80, () => {
-                if (isFinished) return;
-                containerEl.classList.add('hide-cursor');
-                phaseTimeout = setTimeout(() => {
-                    if (isFinished) return;
-                    containerEl.style.opacity = '0';
-                    phaseTimeout = setTimeout(() => {
-                        if (isFinished) return;
-                        startTypewriterLoop();
-                    }, 300);
-                }, 800);
-            });
-        }
+          <!-- Drag & Drop Zone -->
+          <div id="drop-zone" class="border-2 border-dashed border-neutral-800 hover:border-amber-500/50 bg-neutral-950/40 rounded-xl p-8 text-center transition-all duration-200 cursor-pointer relative group overflow-hidden">
+            <input type="file" id="file-input" class="hidden" accept=".pdf,.docx">
+            
+            <div class="space-y-4 relative z-10 py-4">
+              <div class="inline-flex items-center justify-center w-14 h-14 bg-neutral-900 border border-neutral-800 rounded-lg text-amber-500 group-hover:scale-110 group-hover:border-amber-500 group-hover:shadow-neon-amber transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+              </div>
 
-        window.startChopping = function() {
-            isFinished = false;
-            clearTimeouts();
-            terminalEl.innerHTML = '';
-            textEl.classList.remove('finished');
-            containerEl.style.opacity = '1';
-            startTypewriterLoop();
-        };
+              <div id="drop-zone-text" class="space-y-1">
+                <p class="text-sm font-medium text-neutral-200">
+                  <span class="text-amber-500 font-bold group-hover:underline">Click to browse</span> or drop file here
+                </p>
+                <p class="text-xs text-neutral-500">PDF or DOCX documents up to 100MB</p>
+              </div>
 
-        window.finishChopping = function() {
-            isFinished = true;
-            clearTimeouts();
-            containerEl.style.transition = 'none';
-            containerEl.style.opacity = '1';
-            containerEl.classList.remove('hide-cursor');
-            textEl.classList.add('finished');
-            setTimeout(() => {
-                containerEl.style.transition = 'opacity 0.3s ease';
-                typeString('Chopped.', 80);
-            }, 10);
-        };
-
-        window.pushLog = function(message) {
-            const line = document.createElement('div');
-            line.className = 'axe-log-line';
-            line.textContent = '→ ' + message;
-            terminalEl.appendChild(line);
-            terminalEl.scrollTop = terminalEl.scrollHeight;
-        };
-    })();
-</script>
-
-</div>
-<!-- State 3: Success (Hidden initially) -->
-<div class="hidden text-center" id="success-state">
-<div class="w-20 h-20 mx-auto rounded-full bg-[#E6F4EA] text-[#1E8E3E] flex items-center justify-center mb-6">
-<span class="material-symbols-outlined text-[40px]">check_circle</span>
-</div>
-<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Compression Complete!</h3>
-<div class="bg-surface-container py-4 px-6 rounded-lg inline-block mx-auto mb-8">
-<p class="font-label-md text-label-md text-on-surface-variant" id="stats-text">
-<span class="font-semibold text-on-surface line-through">4.2 MB</span>
-<span class="mx-2 material-symbols-outlined text-[16px] align-middle">arrow_forward</span>
-<span class="font-bold text-primary">1.1 MB</span>
-<span class="ml-2 text-sm px-2 py-0.5 bg-tertiary-container/10 text-tertiary rounded-full">-74%</span>
-</p>
-</div>
-<div class="flex flex-col sm:flex-row gap-4 justify-center">
-<button class="py-4 px-8 rounded-lg font-label-md text-label-md font-bold text-on-primary bg-primary hover:bg-primary-fixed-variant transition-colors flex items-center justify-center gap-2" id="download-btn">
-<span>Download File</span>
-<span class="material-symbols-outlined text-[20px]">download</span>
-</button>
-<button class="py-4 px-8 rounded-lg font-label-md text-label-md font-bold text-on-surface border border-outline hover:bg-surface-container transition-colors" id="reset-btn">
-                            Compress Another
-                        </button>
-</div>
-</div>
-<!-- State 4: Error (Hidden initially) -->
-<div class="hidden text-center py-6" id="server-error-state">
-<div class="w-16 h-16 mx-auto rounded-full bg-error-container text-error flex items-center justify-center mb-4">
-<span class="material-symbols-outlined text-[32px]">warning</span>
-</div>
-<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Compression Failed</h3>
-<p class="font-body-md text-body-md text-on-surface-variant mb-6" id="server-error-msg">An error occurred while processing your file.</p>
-<button class="py-3 px-6 rounded-lg font-label-md text-label-md font-bold text-on-surface border border-outline hover:bg-surface-container transition-colors" id="retry-btn">
-                        Try Again
-                    </button>
-</div>
-</div>
-</div>
-</main>
-<!-- Footer (From JSON Shared Component) -->
-<footer class="w-full py-8 bg-transparent border-t border-surface-variant/20 mt-auto">
-<div class="flex flex-col md:flex-row justify-between items-center px-gutter max-w-card-max mx-auto gap-4">
-<div class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface tracking-tight">AXE</div>
-<div class="text-on-surface-variant dark:text-surface-variant font-label-sm text-label-sm">
-                Built for fast document workflows.
+              <!-- Selected File Display -->
+              <div id="file-info" class="hidden max-w-md mx-auto bg-neutral-900 border border-neutral-800 p-3 rounded-lg flex items-center justify-between text-left">
+                <div class="flex items-center gap-3 overflow-hidden">
+                  <div class="bg-amber-500/10 text-amber-500 p-2 rounded shrink-0">
+                    <svg id="doc-icon-pdf" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <svg id="doc-icon-word" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  </div>
+                  <div class="overflow-hidden">
+                    <p id="file-name" class="text-xs font-bold text-neutral-200 truncate">document_name.pdf</p>
+                    <p id="file-size" class="text-[10px] text-neutral-500">0.0 MB</p>
+                  </div>
+                </div>
+                <button type="button" id="remove-file-btn" class="text-neutral-500 hover:text-rose-500 p-1 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
             </div>
-<div class="flex gap-6">
-<a class="text-on-surface-variant dark:text-surface-variant font-label-sm text-label-sm hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Privacy Policy</a>
-<a class="text-on-surface-variant dark:text-surface-variant font-label-sm text-label-sm hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Terms of Service</a>
-<a class="text-on-surface-variant dark:text-surface-variant font-label-sm text-label-sm hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Contact</a>
-</div>
-<div class="text-on-surface-variant dark:text-surface-variant font-label-sm text-label-sm">
-                © 2024 AXE Compression. All rights reserved.
+          </div>
+
+          <!-- Redesigned Single-Rectangle Compression Control -->
+          <div class="space-y-3">
+            <label class="text-xs font-bold text-neutral-400 uppercase tracking-widest block text-center sm:text-left">Compression Intensity</label>
+            
+            <div class="relative bg-neutral-950/80 border border-neutral-800 rounded-xl p-1 flex items-stretch">
+              
+              <!-- Minimum -->
+              <label class="flex-1 relative cursor-pointer text-center group">
+                <input type="radio" name="compressionLevel" value="low" class="sr-only peer">
+                <div class="py-3 px-1 rounded-lg text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-widest transition-all duration-300 border border-transparent peer-checked:text-amber-500 peer-checked:bg-amber-500/10 peer-checked:shadow-neon-amber-inset peer-checked:border-amber-500/50 group-hover:text-neutral-300">
+                  Minimum
+                </div>
+              </label>
+
+              <!-- Medium -->
+              <label class="flex-1 relative cursor-pointer text-center group">
+                <input type="radio" name="compressionLevel" value="medium" checked class="sr-only peer">
+                <!-- Divider -->
+                <div class="absolute left-0 top-3 bottom-3 w-px bg-neutral-800 peer-checked:opacity-0 transition-opacity"></div>
+                <div class="py-3 px-1 rounded-lg text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-widest transition-all duration-300 border border-transparent peer-checked:text-amber-500 peer-checked:bg-amber-500/10 peer-checked:shadow-neon-amber-inset peer-checked:border-amber-500/50 group-hover:text-neutral-300">
+                  Medium
+                </div>
+              </label>
+
+              <!-- High -->
+              <label class="flex-1 relative cursor-pointer text-center group">
+                <input type="radio" name="compressionLevel" value="high" class="sr-only peer">
+                <!-- Divider -->
+                <div class="absolute left-0 top-3 bottom-3 w-px bg-neutral-800 peer-checked:opacity-0 transition-opacity"></div>
+                <div class="py-3 px-1 rounded-lg text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-widest transition-all duration-300 border border-transparent peer-checked:text-amber-500 peer-checked:bg-amber-500/10 peer-checked:shadow-neon-amber-inset peer-checked:border-amber-500/50 group-hover:text-neutral-300">
+                  High
+                </div>
+              </label>
+
             </div>
-</div>
-</footer>
-<script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const dropZone = document.getElementById('drop-zone');
-            const fileInput = document.getElementById('file-input');
-            const fileErrorMsg = document.getElementById('file-error-msg');
-            const filePreview = document.getElementById('file-preview');
-            const fileNameDisplay = document.getElementById('file-name');
-            const fileBadgeDisplay = document.getElementById('file-badge');
-            const fileTypeIcon = document.getElementById('file-type-icon');
-            const removeFileBtn = document.getElementById('remove-file-btn');
-            const compressBtn = document.getElementById('compress-btn');
+          </div>
+
+          <!-- Action Button -->
+          <button id="compress-btn" disabled class="w-full bg-neutral-800 text-neutral-500 font-display font-black text-sm uppercase tracking-widest py-4 rounded-xl border border-neutral-700/50 transition-all duration-300 disabled:cursor-not-allowed hover:bg-amber-500 hover:text-black hover:shadow-neon-amber-strong">
+            COMPRESS DOCUMENT
+          </button>
+        </div>
+
+        <!-- STATE 2: PROCESSING & COMPRESSING STAGES -->
+        <div id="state-processing" class="p-6 md:p-8 space-y-8 hidden">
+          
+          <!-- Processing Visual Core (GIF swap zone) -->
+          <div class="relative w-full aspect-video md:aspect-[21/9] bg-black/60 border border-neutral-800 rounded-xl overflow-hidden flex items-center justify-center">
             
-            const uploadState = document.getElementById('upload-state');
-            const processingState = document.getElementById('processing-state');
-            const successState = document.getElementById('success-state');
-            const errorState = document.getElementById('server-error-state');
+            <div id="processing-laser" class="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent shadow-[0_0_8px_rgba(245,158,11,0.8)] z-20 laser-line"></div>
             
-            const resetBtn = document.getElementById('reset-btn');
-            const retryBtn = document.getElementById('retry-btn');
-            const downloadBtn = document.getElementById('download-btn');
-            
-            let currentFile = null;
+            <!-- 1. Active Looping visual -->
+            <div id="processing-active-img-wrapper" class="absolute inset-0 flex items-center justify-center p-4">
+              <!-- Replace src with active loop GIF URL -->
+              <img id="processing-gif" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect fill='none' stroke='%23f59e0b' stroke-width='4' x='25' y='25' width='50' height='50'><animate attributeName='opacity' values='0.3;1;0.3' dur='1.5s' repeatCount='indefinite'/></rect><path d='M20 50 L80 50' stroke='%23f59e0b' stroke-width='2' stroke-dasharray='5 5'><animate attributeName='stroke-dashoffset' values='0;10' dur='1s' repeatCount='indefinite'/></path></svg>" class="max-h-full max-w-full object-contain filter grayscale contrast-125 opacity-80" alt="Processing loop"/>
+            </div>
 
-            // -- File Handling UI Logic --
+            <!-- 2. Done Static Visual -->
+            <div id="processing-success-img-wrapper" class="absolute inset-0 flex items-center justify-center p-4 hidden bg-amber-500/[0.02]">
+              <!-- Replace src with static done image URL -->
+              <img id="success-static-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='20' fill='none' stroke='%2310b981' stroke-width='4'/><path d='M42 50 L48 56 L58 44' fill='none' stroke='%2310b981' stroke-width='4'/></svg>" class="max-h-full max-w-full object-contain" alt="Finished"/>
+            </div>
 
-            const formatBytes = (bytes, decimals = 2) => {
-                if (bytes === 0) return '0 Bytes';
-                const k = 1024;
-                const dm = decimals < 0 ? 0 : decimals;
-                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-            };
+            <div class="absolute inset-0 scanlines pointer-events-none mix-blend-overlay"></div>
+          </div>
 
-            const validateAndSetFile = (file) => {
-                const validTypes = [
-                    'application/pdf', 
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                ];
-                
-                dropZone.classList.remove('error');
-                fileErrorMsg.classList.add('hidden');
+          <!-- Progress Logs Terminal -->
+          <div class="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3">
+            <div class="flex items-center justify-between border-b border-neutral-800/80 pb-2 text-[10px] text-neutral-500 uppercase font-bold tracking-widest">
+              <span>AXE Blade Logs</span>
+              <span id="job-id-indicator" class="font-mono text-amber-500">ID: Unknown</span>
+            </div>
+            <div id="log-terminal" class="h-28 overflow-y-auto text-xs text-neutral-300 font-mono space-y-1 scroll-smooth pr-2">
+              <div class="text-amber-500">&gt; Securing active server core session...</div>
+            </div>
+          </div>
 
-                if (file && validTypes.includes(file.type)) {
-                    currentFile = file;
-                    
-                    // Update UI
-                    fileNameDisplay.textContent = file.name;
-                    const typeLabel = file.type === 'application/pdf' ? 'PDF' : 'DOCX';
-                    fileBadgeDisplay.textContent = `${typeLabel} detected • ${formatBytes(file.size)}`;
-                    fileTypeIcon.textContent = file.type === 'application/pdf' ? 'picture_as_pdf' : 'description';
-                    
-                    dropZone.classList.add('hidden');
-                    filePreview.classList.remove('hidden');
-                    
-                    // Enable Button
-                    compressBtn.removeAttribute('disabled');
-                    compressBtn.classList.remove('bg-outline-variant', 'text-on-primary', 'cursor-not-allowed');
-                    compressBtn.classList.add('bg-primary', 'text-on-primary', 'hover:bg-primary-fixed-variant', 'cursor-pointer');
-                } else if (file) {
-                    // Invalid File
-                    dropZone.classList.add('error');
-                    fileErrorMsg.classList.remove('hidden');
-                    resetFileState();
-                }
-            };
+          <!-- Statistics Box -->
+          <div id="reduction-statistics-box" class="grid grid-cols-2 gap-4 border border-neutral-800 bg-neutral-950/40 p-4 rounded-xl hidden">
+            <div>
+              <p class="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Before AXE</p>
+              <p id="stat-before-size" class="text-xl font-bold text-neutral-400 mt-1">0.0 MB</p>
+            </div>
+            <div class="border-l border-neutral-800 pl-4">
+              <p class="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">After AXE</p>
+              <p id="stat-after-size" class="text-xl font-bold text-amber-500 mt-1">Processing...</p>
+            </div>
+          </div>
 
-            const resetFileState = () => {
-                currentFile = null;
-                fileInput.value = '';
-                filePreview.classList.add('hidden');
-                dropZone.classList.remove('hidden');
-                
-                // Disable Button
-                compressBtn.setAttribute('disabled', 'true');
-                compressBtn.classList.add('bg-outline-variant', 'text-on-primary', 'cursor-not-allowed');
-                compressBtn.classList.remove('bg-primary', 'text-on-primary', 'hover:bg-primary-fixed-variant', 'cursor-pointer');
-            };
+          <!-- Dynamic Operations Actions -->
+          <div class="flex flex-col sm:flex-row gap-3">
+            <a id="download-result-btn" href="#" class="flex-1 bg-amber-500 text-black font-display font-black text-sm uppercase tracking-widest py-4 rounded-xl border border-amber-600 transition-all text-center hover:bg-amber-400 hover:shadow-neon-amber-strong hidden">
+              DOWNLOAD SEVERED FILE
+            </a>
+            <button id="restart-axe-btn" class="flex-1 bg-neutral-900 text-neutral-400 font-display font-black text-sm uppercase tracking-widest py-4 rounded-xl border border-neutral-800 hover:border-amber-500/50 hover:text-white transition-all text-center hidden">
+              COMPRESS ANOTHER
+            </button>
+          </div>
+        </div>
 
-            // -- Event Listeners for Drag & Drop --
-            
-            dropZone.addEventListener('click', () => fileInput.click());
-            
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) validateAndSetFile(e.target.files[0]);
-            });
+        <!-- STATE 3: ERROR STATE -->
+        <div id="state-error" class="p-6 md:p-8 space-y-6 hidden text-center">
+          <div class="w-16 h-16 bg-rose-500/10 border border-rose-500 text-rose-500 flex items-center justify-center mx-auto rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div class="space-y-2">
+            <h3 class="text-lg font-bold text-rose-400 uppercase tracking-widest">ERROR CUTTING FILE</h3>
+            <p id="error-message-text" class="text-xs text-neutral-400 max-w-md mx-auto">
+              An unexpected failure occurred while streaming data inputs to the cutting engine.
+            </p>
+          </div>
+          <button id="retry-axe-btn" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white font-display font-black text-sm uppercase tracking-widest py-4 rounded-xl border border-neutral-800 hover:border-amber-500/30 transition-all">
+            TRY AGAIN
+          </button>
+        </div>
 
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, preventDefaults, false);
-            });
+      </div>
 
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
+      <!-- Persistent "Beep" Disclaimer Section -->
+      <div class="mt-8 text-center max-w-lg mx-auto border-t border-b border-neutral-800/40 py-3 relative h-10 flex items-center justify-center overflow-hidden">
+        <div id="disclaimer-container" class="w-full transition-all duration-150">
+          <p class="axe-disclaimer text-[10px] uppercase tracking-widest text-neutral-500 font-bold block">
+            Files are processed temporarily and deleted automatically after 30 minutes — we don't store, read, or share your documents.
+          </p>
+          <p class="axe-disclaimer text-[10px] uppercase tracking-widest text-neutral-500 font-bold hidden">
+            Already-optimized files may see little to no size reduction — this is expected, not an error.
+          </p>
+          <p class="axe-disclaimer text-[10px] uppercase tracking-widest text-neutral-500 font-bold hidden">
+            Larger files take longer to compress. Please be patient during processing.
+          </p>
+        </div>
+      </div>
 
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropZone.addEventListener(eventName, () => dropZone.classList.add('active'), false);
-            });
+    </div>
+  </main>
 
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, () => dropZone.classList.remove('active'), false);
-            });
+  <!-- Technical Brand Footer (IMPULSE branding) -->
+  <footer class="relative z-10 border-t border-neutral-800/40 bg-neutral-950/60 py-6 px-6 text-center">
+    <div class="max-w-6xl mx-auto">
+      <p class="text-xs text-neutral-500 tracking-wider">
+        Brought to you by 
+        <!-- TO-DO: Replace #REPLACE_WITH_IMPULSE_LINK with actual IMPULSE link -->
+        <a href="#REPLACE_WITH_IMPULSE_LINK" class="font-display font-extrabold text-amber-500 hover:text-white transition-colors duration-300">
+          IMPULSE
+        </a>
+      </p>
+    </div>
+  </footer>
 
-            dropZone.addEventListener('drop', (e) => {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                if (files.length > 0) validateAndSetFile(files[0]);
-            });
+  <!-- Application Logic -->
+  <script>
+    // State UI & DOM Node Queries
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const dropZoneText = document.getElementById('drop-zone-text');
+    const fileInfo = document.getElementById('file-info');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const removeFileBtn = document.getElementById('remove-file-btn');
+    const docIconPdf = document.getElementById('doc-icon-pdf');
+    const docIconWord = document.getElementById('doc-icon-word');
+    
+    const compressBtn = document.getElementById('compress-btn');
+    const systemStatusText = document.getElementById('system-status-text');
+    
+    const stateUpload = document.getElementById('state-upload');
+    const stateProcessing = document.getElementById('state-processing');
+    const stateError = document.getElementById('state-error');
+    
+    const processingActiveImgWrapper = document.getElementById('processing-active-img-wrapper');
+    const processingSuccessImgWrapper = document.getElementById('processing-success-img-wrapper');
+    const processingLaser = document.getElementById('processing-laser');
+    
+    const jobIdIndicator = document.getElementById('job-id-indicator');
+    const logTerminal = document.getElementById('log-terminal');
+    const statsBox = document.getElementById('reduction-statistics-box');
+    const statBeforeSize = document.getElementById('stat-before-size');
+    const statAfterSize = document.getElementById('stat-after-size');
+    
+    const downloadResultBtn = document.getElementById('download-result-btn');
+    const restartAxeBtn = document.getElementById('restart-axe-btn');
+    const retryAxeBtn = document.getElementById('retry-axe-btn');
+    
+    // Hamburger Menu Logic
+    const userMenuBtn = document.getElementById('user-menu-btn');
+    const userDropdown = document.getElementById('user-dropdown');
+    
+    userMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle('hidden');
+    });
 
-            removeFileBtn.addEventListener('click', resetFileState);
+    document.addEventListener('click', (e) => {
+      if (!userDropdown.contains(e.target) && !userMenuBtn.contains(e.target)) {
+        userDropdown.classList.add('hidden');
+      }
+    });
 
-            // -- View State Management --
-            const showView = (viewElement) => {
-                [uploadState, processingState, successState, errorState].forEach(el => el.classList.add('hidden'));
-                viewElement.classList.remove('hidden');
-            };
+    // Disclaimer "Beep" Rotator Logic
+    const disclaimers = document.querySelectorAll('.axe-disclaimer');
+    const disclaimerContainer = document.getElementById('disclaimer-container');
+    let currentDisclaimerIndex = 0;
 
-            // -- Real API Call & Compression Logic --
+    setInterval(() => {
+      // Execute beep visual flash
+      disclaimerContainer.classList.add('beep-flash', 'text-amber-500');
+      
+      // Swap text precisely halfway through the fast animation
+      setTimeout(() => {
+        disclaimers[currentDisclaimerIndex].classList.add('hidden');
+        currentDisclaimerIndex = (currentDisclaimerIndex + 1) % disclaimers.length;
+        disclaimers[currentDisclaimerIndex].classList.remove('hidden');
+      }, 75); 
 
-            let downloadJobId = null;
-            let pollInterval = null;
+      // Remove class so it can be re-triggered
+      setTimeout(() => {
+        disclaimerContainer.classList.remove('beep-flash', 'text-amber-500');
+      }, 150);
+    }, 4500);
 
-            compressBtn.addEventListener('click', async () => {
-                if (!currentFile) return;
+    // Local state variables
+    let selectedFile = null;
+    let currentJobId = null;
+    let pollingInterval = null;
+    let wakeLock = null;
 
-                showView(processingState);
-                if (window.startChopping) window.startChopping();
+    const LOCAL_STORAGE_KEY = 'axe_pending_job';
 
-                const formData = new FormData();
-                formData.append('file', currentFile);
-                formData.append('compressionLevel', document.getElementById('compression-level').value);
+    /* ==========================================================
+       1. INITIALIZATION & RECOVERY LOOPS
+       ========================================================== */
+    window.addEventListener('load', () => {
+      const savedJobId = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedJobId) {
+        showToast("Session Restored", "Resuming pending document split job.", "amber");
+        currentJobId = savedJobId;
+        startJobTracking(currentJobId);
+      }
+    });
 
-                try {
-                    const response = await fetch('/compress', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({}));
-                        showError(errorData.error || 'Failed to start compression.');
-                        return;
-                    }
-
-                    const { jobId } = await response.json();
-                    downloadJobId = jobId;
-
-                    let seenLogCount = 0;
-                    // Resume polling if user returns to the tab
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && downloadJobId && !pollInterval) {
-        pollInterval = setInterval(pollStatus, 2000);
+    /* ==========================================================
+       2. NOTIFICATION SYSTEM
+       ========================================================== */
+    function showToast(title, message, theme = 'amber') {
+      const banner = document.getElementById('notification-banner');
+      const titleEl = document.getElementById('notification-title');
+      const msgEl = document.getElementById('notification-message');
+      
+      titleEl.innerText = title.toUpperCase();
+      msgEl.innerText = message;
+      
+      banner.style.opacity = '1';
+      banner.style.transform = 'translateX(0)';
+      
+      setTimeout(() => dismissNotification(), 5000);
     }
-});
 
-                  const pollStatus = async () => {
-                        try {
-                            const statusRes = await fetch(`/status/${jobId}`);
-                            const statusData = await statusRes.json();
+    function dismissNotification() {
+      const banner = document.getElementById('notification-banner');
+      banner.style.opacity = '0';
+      banner.style.transform = 'translateX(20rem)';
+    }
 
-                            // Push any new log lines
-                            if (statusData.logs && statusData.logs.length > seenLogCount) {
-                                for (let i = seenLogCount; i < statusData.logs.length; i++) {
-                                    if (window.pushLog) window.pushLog(statusData.logs[i]);
-                                }
-                                seenLogCount = statusData.logs.length;
-                            }
+    /* ==========================================================
+       3. DRAG & DROP + SELECTION ACTIONS
+       ========================================================== */
+    dropZone.addEventListener('click', (e) => {
+      if (!e.target.closest('#remove-file-btn')) {
+        fileInput.click();
+      }
+    });
 
-                            if (statusData.status === 'done') {
-                                clearInterval(pollInterval);
-                                pollInterval = null;
-                                if (window.finishChopping) window.finishChopping();
+    function handleFileSelection(file) {
+      if (!file) return;
 
-                                const originalSize = statusData.originalSize;
-                                const compressedSize = statusData.compressedSize;
-                                const reductionPercent = Math.round((1 - (compressedSize / originalSize)) * 100);
+      const extension = file.name.split('.').pop().toLowerCase();
+      if (extension !== 'pdf' && extension !== 'docx') {
+        showToast("Invalid Input", "We only accept .pdf or .docx files for dynamic severing.", "rose");
+        return;
+      }
 
-                                document.getElementById('stats-text').innerHTML = `
-                                    <span class="font-semibold text-on-surface line-through">${formatBytes(originalSize)}</span>
-                                    <span class="mx-2 material-symbols-outlined text-[16px] align-middle">arrow_forward</span>
-                                    <span class="font-bold text-primary">${formatBytes(compressedSize)}</span>
-                                    <span class="ml-2 text-sm px-2 py-0.5 bg-tertiary-container/10 text-tertiary rounded-full">-${reductionPercent}%</span>
-                                `;
+      selectedFile = file;
+      fileName.innerText = file.name;
+      fileSize.innerText = formatBytes(file.size);
 
-                                setTimeout(() => showView(successState), 600);
+      if (extension === 'pdf') {
+        docIconPdf.classList.remove('hidden');
+        docIconWord.classList.add('hidden');
+      } else {
+        docIconWord.classList.remove('hidden');
+        docIconPdf.classList.add('hidden');
+      }
 
-                            } else if (statusData.status === 'error') {
-                                clearInterval(pollInterval);
-                                pollInterval = null;
-                                showError(statusData.error || 'Compression failed.');
-                            }
-                        } catch (pollErr) {
-                            clearInterval(pollInterval);
-                            pollInterval = null;
-                            showError('Lost connection while checking progress.');
-                        }
-                    };
+      dropZoneText.classList.add('hidden');
+      fileInfo.classList.remove('hidden');
+      
+      compressBtn.disabled = false;
+      compressBtn.classList.remove('bg-neutral-800', 'text-neutral-500', 'border-neutral-700/50');
+      compressBtn.classList.add('bg-amber-500', 'text-black', 'border-amber-600', 'cursor-pointer');
+      
+      systemStatusText.innerText = "Target Locked";
+    }
 
-                    pollInterval = setInterval(pollStatus, 2000);
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-amber-500', 'bg-amber-500/5', 'shadow-neon-amber');
+      }, false);
+    });
 
-                    // Resume polling if user returns to the tab mid-compression
-                    document.addEventListener('visibilitychange', () => {
-                        if (document.visibilityState === 'visible' && downloadJobId && !pollInterval) {
-                            pollInterval = setInterval(pollStatus, 2000);
-                        }
-                    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-amber-500', 'bg-amber-500/5', 'shadow-neon-amber');
+      }, false);
+    });
 
-                } catch (networkErr) {
-                    console.error('Network error:', networkErr);
-                    showError('Could not reach the server. Please check your connection and try again.');
-                }
-            });
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const file = dt.files[0];
+      handleFileSelection(file);
+    });
 
-            function showError(message) {
-                document.getElementById('server-error-msg').textContent = message;
-                showView(errorState);
-            }
+    fileInput.addEventListener('change', (e) => {
+      handleFileSelection(e.target.files[0]);
+    });
 
-            resetBtn.addEventListener('click', () => {
-                resetFileState();
-                showView(uploadState);
-            });
+    removeFileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      resetUploadInputs();
+    });
 
-            retryBtn.addEventListener('click', () => {
-                showView(uploadState);
-            });
+    function resetUploadInputs() {
+      selectedFile = null;
+      fileInput.value = '';
+      fileInfo.classList.add('hidden');
+      dropZoneText.classList.remove('hidden');
+      compressBtn.disabled = true;
+      compressBtn.classList.add('bg-neutral-800', 'text-neutral-500', 'border-neutral-700/50');
+      compressBtn.classList.remove('bg-amber-500', 'text-black', 'border-amber-600', 'cursor-pointer');
+      systemStatusText.innerText = "System Ready";
+    }
 
-            downloadBtn.addEventListener('click', () => {
-                if (!downloadJobId) return;
-                window.location.href = `/download/${downloadJobId}`;
-            });
+    /* ==========================================================
+       4. SERVER PROCESSING HOOKS
+       ========================================================== */
+    window.startChopping = function() {
+      stateUpload.classList.add('hidden');
+      stateError.classList.add('hidden');
+      stateProcessing.classList.remove('hidden');
+      
+      processingActiveImgWrapper.classList.remove('hidden');
+      processingSuccessImgWrapper.classList.add('hidden');
+      processingLaser.classList.remove('hidden');
+
+      statsBox.classList.add('hidden');
+      downloadResultBtn.classList.add('hidden');
+      restartAxeBtn.classList.add('hidden');
+      
+      systemStatusText.innerText = "Severing Excess Details";
+    }
+
+    window.finishChopping = function() {
+      processingActiveImgWrapper.classList.add('hidden');
+      processingSuccessImgWrapper.classList.remove('hidden');
+      processingLaser.classList.add('hidden');
+
+      statsBox.classList.remove('hidden');
+      downloadResultBtn.classList.remove('hidden');
+      restartAxeBtn.classList.remove('hidden');
+
+      systemStatusText.innerText = "Sever Complete";
+    }
+
+    window.pushLog = function(message) {
+      const line = document.createElement('div');
+      line.innerHTML = `<span class="text-neutral-500">&gt;</span> ${message}`;
+      logTerminal.appendChild(line);
+      logTerminal.scrollTop = logTerminal.scrollHeight;
+    }
+
+    /* ==========================================================
+       5. ACTIVE COMPRESSION LOGIC
+       ========================================================== */
+    compressBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      const compLevel = document.querySelector('input[name="compressionLevel"]:checked').value;
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('compressionLevel', compLevel);
+
+      window.startChopping();
+      window.pushLog(`Acquiring upload target: ${selectedFile.name}...`);
+      window.pushLog(`Setting blade tension speed to: [${compLevel.toUpperCase()}]`);
+
+      await requestWakeLock();
+
+      try {
+        const response = await fetch('/compress', {
+          method: 'POST',
+          body: formData
         });
-    </script>  
-</body></html>
+
+        await releaseWakeLock();
+
+        if (!response.ok) throw new Error(`Upload aborted: Server returned status code ${response.status}`);
+
+        const data = await response.json();
+        if (data.jobId) {
+          currentJobId = data.jobId;
+          localStorage.setItem(LOCAL_STORAGE_KEY, currentJobId);
+          window.pushLog(`Job registered successfully under ID: ${currentJobId}`);
+          
+          startJobTracking(currentJobId);
+        } else {
+          throw new Error('Server response failed to assign a unique jobId.');
+        }
+
+      } catch (error) {
+        await releaseWakeLock();
+        handleProcessingFailure(error.message);
+      }
+    });
+
+    function startJobTracking(jobId) {
+      currentJobId = jobId;
+      jobIdIndicator.innerText = `ID: ${jobId}`;
+      
+      if (!stateUpload.classList.contains('hidden')) {
+        window.startChopping();
+      }
+
+      if (pollingInterval) clearInterval(pollingInterval);
+
+      pollJobStatus(jobId);
+      pollingInterval = setInterval(() => {
+        pollJobStatus(jobId);
+      }, 2000);
+    }
+
+    async function pollJobStatus(jobId) {
+      try {
+        const response = await fetch(`/status/${jobId}`);
+        if (!response.ok) throw new Error(`Server status tracking returned HTTP state error: ${response.status}`);
+
+        const data = await response.json();
+        
+        if (data.logs && data.logs.length > 0) {
+          logTerminal.innerHTML = '';
+          data.logs.forEach(msg => window.pushLog(msg));
+        }
+
+        if (data.status === 'processing') {
+          window.pushLog('Polling pipeline active... Engine cutting process running.');
+        } else if (data.status === 'done') {
+          clearInterval(pollingInterval);
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
+          
+          window.pushLog(`Document successfully cut and optimized!`);
+          
+          statBeforeSize.innerText = formatBytes(data.originalSize || 0);
+          if (data.compressedSize) {
+            statAfterSize.innerText = formatBytes(data.compressedSize);
+            const ratio = ((data.originalSize - data.compressedSize) / data.originalSize * 100).toFixed(1);
+            window.pushLog(`Calculated weight loss ratio: ${ratio}% smaller.`);
+          } else {
+            statAfterSize.innerText = 'Reduced';
+          }
+
+          downloadResultBtn.href = `/download/${jobId}`;
+          window.finishChopping();
+          showToast("Success", "File cut complete. Ready for download.", "amber");
+
+        } else if (data.status === 'error') {
+          clearInterval(pollingInterval);
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
+          handleProcessingFailure(data.error || 'Server processing error occurred.');
+        }
+
+      } catch (error) {
+        clearInterval(pollingInterval);
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        handleProcessingFailure(error.message);
+      }
+    }
+
+    function handleProcessingFailure(errString) {
+      stateUpload.classList.add('hidden');
+      stateProcessing.classList.add('hidden');
+      stateError.classList.remove('hidden');
+      
+      document.getElementById('error-message-text').innerText = errString;
+      systemStatusText.innerText = "Operation Aborted";
+      showToast("Operation Failed", errString, "rose");
+    }
+
+    restartAxeBtn.addEventListener('click', () => {
+      resetUploadInputs();
+      stateProcessing.classList.add('hidden');
+      stateError.classList.add('hidden');
+      stateUpload.classList.remove('hidden');
+    });
+
+    retryAxeBtn.addEventListener('click', () => {
+      resetUploadInputs();
+      stateProcessing.classList.add('hidden');
+      stateError.classList.add('hidden');
+      stateUpload.classList.remove('hidden');
+    });
+
+    /* ==========================================================
+       6. WAKE LOCK CAPABILITIES (PRESERVED LOGIC)
+       ========================================================== */
+    async function requestWakeLock() {
+      if ('wakeLock' in navigator) {
+        try { wakeLock = await navigator.wakeLock.request('screen'); } 
+        catch (err) { console.warn(`Could not active WakeLock: ${err.message}`); }
+      }
+    }
+
+    async function releaseWakeLock() {
+      if (wakeLock) {
+        try { await wakeLock.release(); wakeLock = null; } 
+        catch (err) { console.error(err); }
+      }
+    }
+
+    document.addEventListener('visibilitychange', async () => {
+      if (wakeLock !== null && document.visibilityState === 'visible') {
+        await requestWakeLock();
+      }
+      if (document.visibilityState === 'visible' && currentJobId) {
+        const savedJobId = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedJobId && !pollingInterval) {
+          startJobTracking(savedJobId);
+        }
+      }
+    });
+
+    /* ==========================================================
+       7. HELPER UTILITIES
+       ========================================================== */
+    function formatBytes(bytes, decimals = 2) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+  </script>
+</body>
+</html>
+

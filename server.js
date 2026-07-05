@@ -9,7 +9,8 @@ const path = require('path');
 const fs = require('fs');
 const { execFile } = require('child_process');
 const JSZip = require('jszip');
-const sharp = require('sharp');
+const MOCK_COMPRESSION = process.env.MOCK_COMPRESSION === 'true';
+const sharp = MOCK_COMPRESSION ? null : require('sharp');
 const crypto = require('crypto');
 
 // Initialize the Express application
@@ -75,8 +76,16 @@ const processFile = async (jobId, file, body) => {
     const requestedLevel = body.compressionLevel;
     const compressionLevel = validLevels.includes(requestedLevel) ? requestedLevel : 'medium';
 
-    try {
-        if (ext === '.docx') {
+        try {
+    if (MOCK_COMPRESSION) {
+        job.outputFilename = `${parsedPath.name}-mock-compressed${ext}`;
+        job.outputPath = path.join(__dirname, 'tmp', job.outputFilename);
+
+        job.logs.push("MOCK MODE: skipping real compression");
+        await new Promise(resolve => setTimeout(resolve, 3000)); // simulate work
+        await fs.promises.copyFile(inputFilePath, job.outputPath);
+
+    } else if (ext === '.docx') {
             job.outputFilename = `${parsedPath.name}-compressed.docx`;
             job.outputPath = path.join(__dirname, 'tmp', job.outputFilename);
 
