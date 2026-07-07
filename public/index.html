@@ -95,7 +95,7 @@
   <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
   <span class="text-xs text-neutral-400 uppercase tracking-wider">ENGINE SECURE</span>
 </div>
-<span id="auth-greeting" class="text-xs text-amber-500 uppercase tracking-wider hidden font-bold"></span>
+<span id="auth-greeting" class="text-xs text-amber-500 uppercase tracking-wider hidden font-bold truncate max-w-[120px] sm:max-w-[200px]"></span>
         
         <!-- Hamburger Menu Container -->
         <div class="relative">
@@ -121,7 +121,7 @@
                 My Files <span class="text-[10px] bg-amber-500/20 px-1.5 py-0.5 rounded">30D</span>
               </a>
               <a href="#" class="block px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-800 transition-colors">Change email</a>
-              <a href="#" class="block px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-800 transition-colors">Change preferred name</a>
+               <a href="#" id="menu-btn-changename" class="block px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-800 transition-colors">Change preferred name</a>
               <div class="border-t border-neutral-800 mt-1 pt-1">
                 <a href="#" id="menu-btn-logout" class="block px-4 py-2.5 text-sm text-rose-500 hover:bg-rose-500/10 transition-colors">Log out</a>
               </div>
@@ -488,9 +488,55 @@
     
     // Magic Link Trigger
    document.getElementById('auth-submit-btn').addEventListener('click', async () => {
-      const email = document.getElementById('auth-email-input').value;
+      const btn = document.getElementById('auth-submit-btn');
       const preferredName = document.getElementById('auth-name-input').value.trim();
+
+      // Name-change mode
+      if (btn.dataset.mode === 'changename') {
+        if (!preferredName) return showToast('Error', 'Name cannot be empty.', 'rose');
+        btn.innerText = 'Updating...'; btn.disabled = true;
+
+        const { data, error } = await supabaseClient.auth.updateUser({
+          data: { preferred_name: preferredName }
+        });
+
+        if (error) {
+          showToast('Update Failed', error.message, 'rose');
+          btn.innerText = 'Update Name'; btn.disabled = false;
+          return;
+        }
+
+        activeUserSession = { ...activeUserSession, user: data.user };
+        document.getElementById('auth-greeting').innerText = `Welcome, ${preferredName}`;
+        showToast('Name Updated', `You're now known as ${preferredName}.`, 'emerald');
+
+        // Reset modal to default signin state
+        btn.dataset.mode = ''; btn.innerText = 'Send Magic Link'; btn.disabled = false;
+        document.getElementById('auth-email-input').closest('div').classList.remove('hidden');
+        closeAuthModal();
+        return;
+      }
+
+      // Default: magic link signin mode
+      const email = document.getElementById('auth-email-input').value;
       if (!email) return showToast('Error', 'Please enter a valid email.', 'rose');
+      
+      btn.innerText = "Transmitting..."; btn.disabled = true;
+
+      const otpPayload = { email };
+      if (preferredName) {
+        otpPayload.options = { data: { preferred_name: preferredName } };
+      }
+      const { error } = await supabaseClient.auth.signInWithOtp(otpPayload);
+      if (error) {
+        showToast('Auth Error', error.message, 'rose');
+        btn.innerText = "Send Magic Link"; btn.disabled = false;
+      } else {
+        showToast('Link Dispatched', 'Check your inbox to secure access.', 'emerald');
+        setTimeout(closeAuthModal, 2000);
+        btn.innerText = "Sent!";
+      }
+    });
       
       const btn = document.getElementById('auth-submit-btn');
       btn.innerText = "Transmitting..."; btn.disabled = true;
@@ -516,7 +562,27 @@
       showToast('Logged Out', 'System access revoked safely.', 'amber');
       document.getElementById('user-dropdown').classList.add('hidden');
     });
+    document.getElementById('menu-btn-changename').addEventListener('click', async (e) => {
+      e.preventDefault();
+      document.getElementById('user-dropdown').classList.add('hidden');
 
+      // Pre-fill the name input with current name
+      const currentName = activeUserSession?.user?.user_metadata?.preferred_name || '';
+      const nameInput = document.getElementById('auth-name-input');
+      const emailInput = document.getElementById('auth-email-input');
+      nameInput.value = currentName;
+      nameInput.placeholder = 'Enter new preferred name';
+
+      // Hide email field — we only need name change here
+      emailInput.closest('div').classList.add('hidden');
+
+      // Change button label and behaviour
+      const submitBtn = document.getElementById('auth-submit-btn');
+      submitBtn.innerText = 'Update Name';
+      submitBtn.dataset.mode = 'changename';
+
+      openAuthModal();
+    });
     // ----------------------------------------------------
     // 3. MY FILES ARCHIVE MODAL LOGIC
     // ----------------------------------------------------
