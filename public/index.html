@@ -417,7 +417,7 @@
 
   <!-- Application Logic -->
   <script>
-  window.onerror = function(msg, url, line) { alert('Error at line ' + line + ': ' + msg); };
+ 
     // ----------------------------------------------------
     // 1. SUPABASE INITIALIZATION
     // ----------------------------------------------------
@@ -538,23 +538,7 @@
       }
     });
       
-      const btn = document.getElementById('auth-submit-btn');
-      btn.innerText = "Transmitting..."; btn.disabled = true;
 
-      const otpPayload = { email };
-      if (preferredName) {
-        otpPayload.options = { data: { preferred_name: preferredName } };
-      }
-      const { error } = await supabaseClient.auth.signInWithOtp(otpPayload);
-      if (error) {
-        showToast('Auth Error', error.message, 'rose');
-        btn.innerText = "Send Magic Link"; btn.disabled = false;
-      } else {
-        showToast('Link Dispatched', 'Check your inbox to secure access.', 'emerald');
-        setTimeout(closeAuthModal, 2000);
-        btn.innerText = "Sent!";
-      }
-    });
 
     document.getElementById('menu-btn-logout').addEventListener('click', async (e) => {
       e.preventDefault();
