@@ -66,6 +66,9 @@
       50% { opacity: 0.3; filter: brightness(2) sepia(1) hue-rotate(-50deg); transform: scale(0.995); }
       100% { opacity: 1; filter: brightness(1); transform: scale(1); }
     }
+    @media (max-width: 639px) {
+  #auth-greeting { display: none !important; }
+}
   </style>
 </head>
 <body class="h-full font-sans antialiased bg-dark-950 flex flex-col justify-between overflow-x-hidden relative">
